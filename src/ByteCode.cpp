@@ -12,7 +12,7 @@ class ByteCode{
 
     private:
 
-        std::vector<unsigned char> data;
+    std::vector<unsigned char> data;
 
     public:
 

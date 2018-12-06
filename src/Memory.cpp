@@ -7,7 +7,7 @@ class Memory{
 
     private:
     std::map<unsigned int, int> registers;
-    // Should just use an array
+    // TODO: Should just use an array
 
     bool equal, greater, less; 
 
@@ -61,6 +61,12 @@ class Memory{
         bool tmp = this->less;
         this->less = false;
         return tmp;
+    }
+
+    void resetCompare(){
+        this->less = false;
+        this->greater = false;
+        this->equal = false;
     }
 
 };
