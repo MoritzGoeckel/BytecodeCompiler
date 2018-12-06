@@ -54,6 +54,12 @@ class ByteCode{
         delete[] buffer;
     }
 
+    void addStatement(unsigned char optCode, unsigned char param_one, unsigned char param_two){
+        data.push_back(optCode);
+        data.push_back(param_one);
+        data.push_back(param_two);
+    }
+
     unsigned char getAt(int index){
         return data.at(index);
     }

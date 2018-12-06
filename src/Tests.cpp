@@ -1,9 +1,12 @@
 #include <iostream>
 #include <vector>
 
-#include "OperationCodes.cpp"
+#include "OptCodeEngine.cpp"
 #include "Memory.cpp"
 #include "ByteCode.cpp"
+
+#include "Compiler.cpp"
+
 #include "gtest/gtest.h"
 
 TEST(Writer, WriteFileTest) {
@@ -17,6 +20,8 @@ TEST(Writer, WriteFileTest) {
     EXPECT_EQ (15, inCode.getAt(0));
     EXPECT_EQ (30, inCode.getAt(1));
     EXPECT_EQ (2, inCode.size());
+
+    compileFile("testfile.ma", "");
 }
 
 int main(int argc, char **argv) {

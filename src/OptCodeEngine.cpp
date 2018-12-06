@@ -88,8 +88,7 @@ class OptCodeEngine{
 
         //ASK         REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            //TODO: Not implemented
-            throw;
+            throw; //TODO: Not implemented
         });
         humanReadableCodes["ASK"] = optCode++;
 
@@ -226,15 +225,13 @@ class OptCodeEngine{
 
         //PUSH    REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            //TODO: Not implemented
-            throw;
+            throw; //TODO: Not implemented
         });
         humanReadableCodes["PUSH"] = optCode++;
 
         //POP         REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            //TODO: Not implemented
-            throw;
+            throw; //TODO: Not implemented
         });
         humanReadableCodes["POP"] = optCode++;
 
