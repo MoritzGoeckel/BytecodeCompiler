@@ -1,0 +1,8 @@
+/CMakeFiles/
+/CMakeFiles/*
+
+Makefile
+runTests
+cmake_install.cmake
+CMakeCache.txt
+testfile.bytes
