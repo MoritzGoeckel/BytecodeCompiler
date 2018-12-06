@@ -1,0 +1,65 @@
+#pragma once
+
+#include <iostream>
+
+#include <fstream>
+#include <assert.h>
+
+#include <vector>
+#include <string>
+
+class ByteCode{
+
+    private:
+
+        std::vector<unsigned char> data;
+
+    public:
+
+    ByteCode(){
+        this->data = std::vector<unsigned char>();
+    }
+
+    ByteCode(std::vector<unsigned char>& data){
+        this->data = data;
+    }
+
+    void write(std::string path){
+        std::ofstream file(path, std::ios_base::binary);
+        assert(file.is_open());
+        
+        file.write((char*)&data[0], data.size());
+        file.close();
+    }
+
+    void read(std::string path){
+        std::ifstream is (path, std::ifstream::binary);
+        assert(is);
+
+        // Get length of file
+        is.seekg (0, is.end);
+        int length = is.tellg();
+
+        // Go back to the beginning
+        is.seekg (0, is.beg);
+
+        char* buffer = new char [length];
+
+        is.read (buffer, length);
+        data.insert(data.end(), buffer, buffer + length);
+
+        assert(is);
+        is.close();
+
+        delete[] buffer;
+    }
+
+    unsigned char getAt(int index){
+        return data.at(index);
+    }
+
+    int size(){
+        return data.size();
+    }
+};
+
