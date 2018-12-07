@@ -1,3 +1,11 @@
 LOAD 5 99
 INCR 99
+JMP label
+INCR 99
+INCR 99
+INCR 99
+label:
+JMP label2
+INCR 99
+label2:
 OUT  99
