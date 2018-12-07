@@ -32,7 +32,7 @@ class OptCodeEngine{
         });
         humanReadableCodes["MOVE"] = optCode++;
 
-        //INCR     REG
+        //INCR    REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
                 memory.setRegister(args[0], memory.getRegister(args[0]) + 1);
                 nextLine++;
@@ -86,7 +86,7 @@ class OptCodeEngine{
         });
         humanReadableCodes["OUT"] = optCode++;
 
-        //ASK         REG
+        //ASK     REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
             throw; //TODO: Not implemented
         });
@@ -229,7 +229,7 @@ class OptCodeEngine{
         });
         humanReadableCodes["PUSH"] = optCode++;
 
-        //POP         REG
+        //POP     REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
             throw; //TODO: Not implemented
         });
