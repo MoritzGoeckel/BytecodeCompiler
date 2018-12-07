@@ -38,11 +38,11 @@ class Memory{
     }
 
     void setGreater(){
-        this->equal = true;
+        this->greater = true;
     }
 
     void setLess(){
-        this->equal = true;
+        this->less = true;
     }
 
     bool getEqual(){

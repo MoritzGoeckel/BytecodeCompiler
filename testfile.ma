@@ -1,7 +1,13 @@
 LOAD 0 99
-LOAD 5 98
-CMP 99 98
-JMPL ende
+LOAD 3 97
+LOAD 10 98
+start:
 INCR 99
-ende:
 OUT 99
+CMP 99 97
+JPGE stop
+OUT 99
+CMP 99 98
+JPL start
+stop:
+END

@@ -42,9 +42,9 @@ void compileFile(std::string inPath, std::string outPath){
         if(tokens[0].back() == ':'){
             tokens[0].erase(tokens[0].end() - 1);
             if(labels.find(tokens[0]) != labels.end())
-                throw;
+                throw "Label already declared";
 
-            labels[tokens[0]] = i - 1;
+            labels[tokens[0]] = i;
             lines.erase(lines.begin() + i);
             i--;
         }
@@ -54,14 +54,13 @@ void compileFile(std::string inPath, std::string outPath){
     //    std::cout << t.first << "\t\t" << t.second << std::endl;
 
     for(auto const& line: lines) {
+        //std::cout << "Processing: " << line << std::endl;
+
         std::vector<std::string> tokens;
         split(line, tokens, ' ');
 
         while(tokens.size() < 3)
             tokens.push_back("0");
-
-        //TODO: Remove
-        //std::cout << "CMD: " << tokens[0] << "\tP1: " << tokens[1] << "\tP2: " << tokens[2] << std::endl;
 
         //Comment
         if(tokens[0] == ";")
@@ -70,7 +69,7 @@ void compileFile(std::string inPath, std::string outPath){
         //JMP
         if(tokens[0] == "JMP" || tokens[0] == "JPE" || tokens[0] == "JPLE" || tokens[0] == "JPGE" || tokens[0] == "JPG" || tokens[0] == "JPL"){
             if(labels.find(tokens[1]) == labels.end())
-                throw;
+                throw "Unknown label";
 
             //std::cout << "Found label link " << labels[tokens[1]] << std::endl;
             tokens[1] = std::to_string(labels[tokens[1]]);
@@ -78,6 +77,9 @@ void compileFile(std::string inPath, std::string outPath){
 
         if(tokens[0].back() == ':')
             throw;
+
+        //TODO: Remove
+        //std::cout << "CMD: " << tokens[0] << "\tP1: " << tokens[1] << "\tP2: " << tokens[2] << std::endl;
 
         //Statement
         code.addStatement(opts.encodeOptString(tokens[0]), stoi(tokens[1]), stoi(tokens[2]));

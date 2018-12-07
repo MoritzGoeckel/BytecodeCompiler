@@ -117,7 +117,7 @@ class OptCodeEngine{
                 nextLine++;
             }
         });
-        humanReadableCodes["JMPE"] = optCode++;
+        humanReadableCodes["JPE"] = optCode++;
         
         //JPL    L 
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
@@ -129,7 +129,7 @@ class OptCodeEngine{
                 nextLine++;
             }
         });
-        humanReadableCodes["JMPL"] = optCode++;
+        humanReadableCodes["JPL"] = optCode++;
 
         //JPG    L 
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
@@ -141,11 +141,11 @@ class OptCodeEngine{
                 nextLine++;
             }
         });
-        humanReadableCodes["JMPG"] = optCode++;
+        humanReadableCodes["JPG"] = optCode++;
 
         //JPGE    L 
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            if(memory.getGreater() && memory.getEqual()){
+            if(memory.getGreater() || memory.getEqual()){
                 memory.resetCompare();
                 nextLine = args[0];
             }
@@ -157,7 +157,7 @@ class OptCodeEngine{
 
         //JPLE    L 
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            if(memory.getLess() && memory.getEqual()){
+            if(memory.getLess() || memory.getEqual()){
                 memory.resetCompare();
                 nextLine = args[0];
             }
@@ -250,10 +250,10 @@ class OptCodeEngine{
 
     unsigned char encodeOptString(std::string str){
         if(str == "LABEL" || str == ";")
-            throw; //Label and comments should be removed by now
+            throw "Labels should be removed by now"; //Label and comments should be removed by now
 
-        if(humanReadableCodes.find(str) == humanReadableCodes.end())
-            throw;
+        if(humanReadableCodes.count(str) != 1)
+            throw "Did not find command opt";
 
         return humanReadableCodes[str];
     }
