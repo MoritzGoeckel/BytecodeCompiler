@@ -9,8 +9,8 @@ class OptCodeEngine{
 
     private:
 
-    typedef void (*Operation)(unsigned char* args, Memory& memory, int& nextLine, bool& end);
     std::map<std::string, unsigned char> humanReadableCodes;
+    typedef void (*Operation)(unsigned char* args, Memory& memory, int& nextLine, bool& end);
     std::vector<Operation> operations;
 
     public:
@@ -20,7 +20,7 @@ class OptCodeEngine{
 
         //LOAD    L   REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            memory.setRegister(args[0], args[1]);
+            memory.setRegister(args[1], args[0]);
             nextLine++;
         });
         humanReadableCodes["LOAD"] = optCode++;
@@ -89,6 +89,7 @@ class OptCodeEngine{
         //ASK     REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
             throw; //TODO: Not implemented
+            nextLine++;
         });
         humanReadableCodes["ASK"] = optCode++;
 
@@ -102,6 +103,7 @@ class OptCodeEngine{
                 memory.setGreater();
             if(a < b)
                 memory.setLess();
+            nextLine++;            
         });
         humanReadableCodes["CMP"] = optCode++;
 
@@ -168,12 +170,14 @@ class OptCodeEngine{
         //JMP     L
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
             nextLine = args[0];
+            nextLine++;
         });
         humanReadableCodes["JMP"] = optCode++;
 
         //DBG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
             memory.print();
+            nextLine++;
         });
         humanReadableCodes["DBG"] = optCode++;
 
@@ -226,12 +230,14 @@ class OptCodeEngine{
         //PUSH    REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
             throw; //TODO: Not implemented
+            nextLine++;
         });
         humanReadableCodes["PUSH"] = optCode++;
 
         //POP     REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
             throw; //TODO: Not implemented
+            nextLine++;
         });
         humanReadableCodes["POP"] = optCode++;
 
@@ -245,6 +251,9 @@ class OptCodeEngine{
     unsigned char encodeOptString(std::string str){
         if(str == "LABEL" || str == ";")
             throw; //Label and comments should be removed by now
+
+        if(humanReadableCodes.find(str) == humanReadableCodes.end())
+            throw;
 
         return humanReadableCodes[str];
     }

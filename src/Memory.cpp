@@ -28,9 +28,9 @@ class Memory{
     }
 
     void print(){
-        std::cout << "Register\tValue" << std::endl;
+        std::cout << "First\t\tSecond" << std::endl;
         for (auto& t : registers)
-            std::cout << t.first << "\t" << t.second << std::endl;
+            std::cout << t.first << "\t\t" << t.second << std::endl;
     }
 
     void setEqual(){

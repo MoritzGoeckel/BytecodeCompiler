@@ -64,6 +64,12 @@ class ByteCode{
         return data.at(index);
     }
 
+    void getStatement(int index, unsigned char& opt, unsigned char& param_one, unsigned char& param_two){
+        opt = data[index * 3];
+        param_one = data[index * 3 + 1];
+        param_two = data[index * 3 + 2];
+    }
+
     int size(){
         return data.size();
     }
