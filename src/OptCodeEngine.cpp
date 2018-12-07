@@ -107,7 +107,7 @@ class OptCodeEngine{
         });
         humanReadableCodes["CMP"] = optCode++;
 
-        //JMPE    L
+        //JPE    L
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
             if(memory.getEqual()){
                 memory.resetCompare();
@@ -119,7 +119,7 @@ class OptCodeEngine{
         });
         humanReadableCodes["JMPE"] = optCode++;
         
-        //JMPL    L 
+        //JPL    L 
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
             if(memory.getLess()){
                 memory.resetCompare();
@@ -131,7 +131,7 @@ class OptCodeEngine{
         });
         humanReadableCodes["JMPL"] = optCode++;
 
-        //JMPG    L 
+        //JPG    L 
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
             if(memory.getGreater()){
                 memory.resetCompare();

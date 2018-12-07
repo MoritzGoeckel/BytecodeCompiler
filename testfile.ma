@@ -1,11 +1,7 @@
-LOAD 5 99
+LOAD 0 99
+LOAD 5 98
+CMP 99 98
+JMPL ende
 INCR 99
-JMP label
-INCR 99
-INCR 99
-INCR 99
-label:
-JMP label2
-INCR 99
-label2:
-OUT  99
+ende:
+OUT 99

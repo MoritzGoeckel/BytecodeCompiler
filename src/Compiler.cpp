@@ -68,7 +68,7 @@ void compileFile(std::string inPath, std::string outPath){
             continue;
 
         //JMP
-        if(tokens[0] == "JMP"){
+        if(tokens[0] == "JMP" || tokens[0] == "JPE" || tokens[0] == "JPLE" || tokens[0] == "JPGE" || tokens[0] == "JPG" || tokens[0] == "JPL"){
             if(labels.find(tokens[1]) == labels.end())
                 throw;
 
