@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "ErrorHandling.cpp"
+
 class OptCodeEngine{
 
     private:
@@ -88,7 +90,7 @@ class OptCodeEngine{
 
         //ASK     REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            throw; //TODO: Not implemented
+            throw std::runtime_error("Not implemented" + BT); //TODO: Not implemented
             nextLine++;
         });
         humanReadableCodes["ASK"] = optCode++;
@@ -229,14 +231,14 @@ class OptCodeEngine{
 
         //PUSH    REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            throw; //TODO: Not implemented
+            throw std::runtime_error("Not implemented" + BT); //TODO: Not implemented
             nextLine++;
         });
         humanReadableCodes["PUSH"] = optCode++;
 
         //POP     REG
         operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            throw; //TODO: Not implemented
+            throw std::runtime_error("Not implemented" + BT); //TODO: Not implemented
             nextLine++;
         });
         humanReadableCodes["POP"] = optCode++;
@@ -250,10 +252,10 @@ class OptCodeEngine{
 
     unsigned char encodeOptString(std::string str){
         if(str == "LABEL" || str == ";")
-            throw "Labels should be removed by now"; //Label and comments should be removed by now
+            throw std::runtime_error("Labels should be removed by now" + BT); //Label and comments should be removed by now
 
         if(humanReadableCodes.count(str) != 1)
-            throw "Did not find command opt";
+            throw std::runtime_error("Did not find command opt" + BT);
 
         return humanReadableCodes[str];
     }

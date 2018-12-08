@@ -8,6 +8,8 @@
 #include <vector>
 #include <string>
 
+#include "ErrorHandling.cpp"
+
 class ByteCode{
 
     private:

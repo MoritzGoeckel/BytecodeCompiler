@@ -5,6 +5,8 @@
 #include "Memory.cpp"
 #include "ByteCode.cpp"
 
+#include "ErrorHandling.cpp"
+
 #include "Compiler.cpp"
 #include "VirtualMachine.cpp"
 

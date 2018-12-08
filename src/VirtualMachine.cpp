@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "ErrorHandling.cpp"
+
 #include "ByteCode.cpp"
 #include "Memory.cpp"
 #include "OptCodeEngine.cpp"

@@ -3,6 +3,8 @@
 #include <map>
 #include <iostream>
 
+#include "ErrorHandling.cpp"
+
 class Memory{
 
     private:

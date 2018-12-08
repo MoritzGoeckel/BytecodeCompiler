@@ -8,6 +8,8 @@
 
 #include <sstream>
 
+#include "ErrorHandling.cpp"
+
 #include "OptCodeEngine.cpp"
 #include "ByteCode.cpp"
 
@@ -42,7 +44,7 @@ void compileFile(std::string inPath, std::string outPath){
         if(tokens[0].back() == ':'){
             tokens[0].erase(tokens[0].end() - 1);
             if(labels.find(tokens[0]) != labels.end())
-                throw "Label already declared";
+                throw std::runtime_error("Label already declared" + BT);
 
             labels[tokens[0]] = i;
             lines.erase(lines.begin() + i);
@@ -69,14 +71,14 @@ void compileFile(std::string inPath, std::string outPath){
         //JMP
         if(tokens[0] == "JMP" || tokens[0] == "JPE" || tokens[0] == "JPLE" || tokens[0] == "JPGE" || tokens[0] == "JPG" || tokens[0] == "JPL"){
             if(labels.find(tokens[1]) == labels.end())
-                throw "Unknown label";
+                throw std::runtime_error("Unknown label" + BT);
 
             //std::cout << "Found label link " << labels[tokens[1]] << std::endl;
             tokens[1] = std::to_string(labels[tokens[1]]);
         }
 
         if(tokens[0].back() == ':')
-            throw;
+            throw std::runtime_error("Labels should be removed by now" + BT);
 
         //TODO: Remove
         //std::cout << "CMD: " << tokens[0] << "\tP1: " << tokens[1] << "\tP2: " << tokens[2] << std::endl;
