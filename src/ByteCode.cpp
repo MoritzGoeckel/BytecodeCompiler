@@ -56,20 +56,17 @@ class ByteCode{
         delete[] buffer;
     }
 
-    void addStatement(unsigned char optCode, unsigned char param_one, unsigned char param_two){
-        data.push_back(optCode);
-        data.push_back(param_one);
-        data.push_back(param_two);
+    void add(unsigned char code){
+        //std::cout << "Got code: " << std::to_string(code) << std::endl;
+        data.push_back(code);
     }
 
     unsigned char getAt(int index){
         return data.at(index);
     }
 
-    void getStatement(int index, unsigned char& opt, unsigned char& param_one, unsigned char& param_two){
-        opt = data[index * 3];
-        param_one = data[index * 3 + 1];
-        param_two = data[index * 3 + 2];
+    unsigned char* getRaw(){
+        return &data[0];
     }
 
     int size(){

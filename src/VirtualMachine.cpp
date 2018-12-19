@@ -14,15 +14,16 @@ namespace VirtualMachine{
         OptCodeEngine e;
         Memory m;
         
-        unsigned char opt, param_one, param_two;
+        unsigned char* byteArray = code.getRaw();
         bool end = false;
-        int lineIndex = 0;
+        int nextStatementIndex = 0;
 
-        while(!end && lineIndex < code.size() / 3){
-            //std::cout << "Line " << lineIndex << " " << code.size() / 3 << std::endl;
-            code.getStatement(lineIndex, opt, param_one, param_two);
-            unsigned char params[] = {param_one, param_two};
-            e.getOperation(opt)(params, m, lineIndex, end);
+        while(!end){
+            unsigned char opt = byteArray[nextStatementIndex];
+
+            std::cout << "Before " << std::to_string(opt) << " " << e.disassambleOptCode(opt) << " " << std::to_string(nextStatementIndex) << " " << std::to_string(end) << std::endl;
+            e.getOperation(opt)(byteArray + nextStatementIndex + 1, m, nextStatementIndex, end);
+            std::cout << "After  " << std::to_string(opt) << " " << e.disassambleOptCode(opt) << " " << std::to_string(nextStatementIndex) << " " << std::to_string(end) << std::endl;
         }
     }
 

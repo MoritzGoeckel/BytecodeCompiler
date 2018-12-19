@@ -37,18 +37,22 @@ void compileFile(std::string inPath, std::string outPath){
         lines.push_back(line);
 
     //Detect, index and remove labels
-    for(int i = 0; i < lines.size(); i++) {
+    int codeIndex = 0;
+    for(int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
         std::vector<std::string> tokens;
-        split(lines[i], tokens, ' ');
+        split(lines[lineIndex], tokens, ' ');
         
         if(tokens[0].back() == ':'){
             tokens[0].erase(tokens[0].end() - 1);
             if(labels.find(tokens[0]) != labels.end())
                 throw std::runtime_error("Label already declared" + BT);
 
-            labels[tokens[0]] = i;
-            lines.erase(lines.begin() + i);
-            i--;
+            labels[tokens[0]] = codeIndex; // -1?
+            lines.erase(lines.begin() + lineIndex);
+            lineIndex--;
+        }
+        else{
+            codeIndex += tokens.size();
         }
     }
 
@@ -61,15 +65,12 @@ void compileFile(std::string inPath, std::string outPath){
         std::vector<std::string> tokens;
         split(line, tokens, ' ');
 
-        while(tokens.size() < 3)
-            tokens.push_back("0");
-
         //Comment
         if(tokens[0] == ";")
             continue;
 
         //JMP
-        if(tokens[0] == "JMP" || tokens[0] == "JPE" || tokens[0] == "JPLE" || tokens[0] == "JPGE" || tokens[0] == "JPG" || tokens[0] == "JPL"){
+        if(tokens[0] == "JMP" || tokens[0] == "JMPC"){
             if(labels.find(tokens[1]) == labels.end())
                 throw std::runtime_error("Unknown label" + BT);
 
@@ -84,7 +85,11 @@ void compileFile(std::string inPath, std::string outPath){
         //std::cout << "CMD: " << tokens[0] << "\tP1: " << tokens[1] << "\tP2: " << tokens[2] << std::endl;
 
         //Statement
-        code.addStatement(opts.encodeOptString(tokens[0]), stoi(tokens[1]), stoi(tokens[2]));
+        //Todo: Dont know how long statements are
+        code.add(opts.encodeOptString(tokens[0]));
+        for(int i = 1; i < tokens.size(); i++){
+            code.add(stoi(tokens[i]));
+        }
     }
 
     code.write(outPath);

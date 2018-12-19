@@ -17,38 +17,44 @@ make
 
 ## Opt codes
 
-        FRM TO
-
 LOAD    L   REG
 MOVE    REG REG
 
-ADD     REG REG
-SUB     REG REG
-MUL     REG REG
-DIV     REG REG
+ADD     REG REG REG
+SUB     REG REG REG
+MUL     REG REG REG
+DIV     REG REG REG
 
 OUT     REG
-ASK         REG
+ASK     REG
 
-CMP     REG REG
+CMPE    REG REG REG
+CMPL    REG REG REG
+CMLE    REG REG REG
+CMPG    REG REG REG
+CMGE    REG REG REG
 
-JMPE    L
-JMPL    L 
-JMPG    L 
-JPGE    L 
-JPLE    L 
+JMPC    REG L 
 JMP     L
 
 DBG
 END
 LABEL   L
 
-AND     REG REG
-OR      REG REG
-XOR     REG REG
-NOT     REG REG
+AND     REG REG REG
+OR      REG REG REG
+XOR     REG REG REG
+NOT     REG REG REG
 
 PUSH    REG
-POP         REG
+POP     REG
 
 ; COMMENT
+
+### gdb
+
+```
+gdb runTests
+catch throw
+run
+```

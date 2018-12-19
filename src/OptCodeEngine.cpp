@@ -12,7 +12,9 @@ class OptCodeEngine{
     private:
 
     std::map<std::string, unsigned char> humanReadableCodes;
-    typedef void (*Operation)(unsigned char* args, Memory& memory, int& nextLine, bool& end);
+    std::map<unsigned char, std::string> optToReadable;
+
+    typedef void (*Operation)(unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end);
     std::vector<Operation> operations;
 
     public:
@@ -21,225 +23,204 @@ class OptCodeEngine{
         int optCode = 0;
 
         //LOAD    L   REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            memory.setRegister(args[1], args[0]);
-            nextLine++;
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            memory.setRegister(statementPtr[1], statementPtr[0]);
+            nextStatementIndex += 3;
         });
         humanReadableCodes["LOAD"] = optCode++;
 
         //MOVE    REG REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            memory.setRegister(args[1], memory.getRegister(args[0]));
-            nextLine++;
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            memory.setRegister(statementPtr[1], memory.getRegister(statementPtr[0]));
+            nextStatementIndex += 3;
         });
         humanReadableCodes["MOVE"] = optCode++;
 
         //INCR    REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-                memory.setRegister(args[0], memory.getRegister(args[0]) + 1);
-                nextLine++;
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+                memory.setRegister(statementPtr[0], memory.getRegister(statementPtr[0]) + 1);
+                nextStatementIndex += 2;
         });
         humanReadableCodes["INCR"] = optCode++;
 
-        //ADD     REG REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
+        //ADD     REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
-                args[0], 
-                memory.getRegister(args[0]) + memory.getRegister(args[1])
+                statementPtr[0], 
+                memory.getRegister(statementPtr[0]) + memory.getRegister(statementPtr[1])
             );
-            nextLine++;
+            nextStatementIndex += 4;
         });
         humanReadableCodes["ADD"] = optCode++;
 
-        //SUB     REG REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
+        //SUB     REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
-                args[0], 
-                memory.getRegister(args[0]) - memory.getRegister(args[1])
+                statementPtr[0], 
+                memory.getRegister(statementPtr[0]) - memory.getRegister(statementPtr[1])
             );
-            nextLine++;
+            nextStatementIndex += 4;
         });
         humanReadableCodes["SUB"] = optCode++;
 
-        //MUL     REG REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
+        //MUL     REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
-                args[0], 
-                memory.getRegister(args[0]) * memory.getRegister(args[1])
+                statementPtr[0], 
+                memory.getRegister(statementPtr[0]) * memory.getRegister(statementPtr[1])
             );
-            nextLine++;
+            nextStatementIndex += 4;
         });
         humanReadableCodes["MUL"] = optCode++;
 
-        //DIV     REG REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
+        //DIV     REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
-                args[0], 
-                memory.getRegister(args[0]) / memory.getRegister(args[1])
+                statementPtr[0], 
+                memory.getRegister(statementPtr[0]) / memory.getRegister(statementPtr[1])
             );
-            nextLine++;
+            nextStatementIndex += 4;
         });
         humanReadableCodes["DIV"] = optCode++;
 
         //OUT     REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            std::cout << memory.getRegister(args[0]) << std::endl;
-            nextLine++;
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            std::cout << memory.getRegister(statementPtr[0]) << std::endl;
+            nextStatementIndex += 2;
         });
         humanReadableCodes["OUT"] = optCode++;
 
         //ASK     REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             throw std::runtime_error("Not implemented" + BT); //TODO: Not implemented
-            nextLine++;
+            nextStatementIndex += 2;
         });
         humanReadableCodes["ASK"] = optCode++;
 
-        //CMP     REG REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            int a = memory.getRegister(args[0]);
-            int b = memory.getRegister(args[1]);
-            if(a == b)
-                memory.setEqual();
-            if(a > b)
-                memory.setGreater();
-            if(a < b)
-                memory.setLess();
-            nextLine++;            
+        //CMPE     REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            int a = memory.getRegister(statementPtr[0]);
+            int b = memory.getRegister(statementPtr[1]);
+            memory.setRegister(statementPtr[1], a == b ? 1 : 0);
+            nextStatementIndex += 4;          
         });
-        humanReadableCodes["CMP"] = optCode++;
-
-        //JPE    L
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            if(memory.getEqual()){
-                memory.resetCompare();
-                nextLine = args[0];
-            }
-            else{
-                nextLine++;
-            }
-        });
-        humanReadableCodes["JPE"] = optCode++;
+        humanReadableCodes["CMPE"] = optCode++;
         
-        //JPL    L 
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            if(memory.getLess()){
-                memory.resetCompare();
-                nextLine = args[0];
-            }
-            else{
-                nextLine++;
-            }
+        //CMPL     REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            int a = memory.getRegister(statementPtr[0]);
+            int b = memory.getRegister(statementPtr[1]);
+            memory.setRegister(statementPtr[1], a < b ? 1 : 0);
+            nextStatementIndex += 4;          
         });
-        humanReadableCodes["JPL"] = optCode++;
+        humanReadableCodes["CMPL"] = optCode++;
 
-        //JPG    L 
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            if(memory.getGreater()){
-                memory.resetCompare();
-                nextLine = args[0];
-            }
-            else{
-                nextLine++;
-            }
+        //CMLE     REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            int a = memory.getRegister(statementPtr[0]);
+            int b = memory.getRegister(statementPtr[1]);
+            memory.setRegister(statementPtr[1], a <= b ? 1 : 0);
+            nextStatementIndex += 4;         
         });
-        humanReadableCodes["JPG"] = optCode++;
+        humanReadableCodes["CMLE"] = optCode++;
 
-        //JPGE    L 
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            if(memory.getGreater() || memory.getEqual()){
-                memory.resetCompare();
-                nextLine = args[0];
-            }
-            else{
-                nextLine++;
-            }
+        //CMPG     REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            int a = memory.getRegister(statementPtr[0]);
+            int b = memory.getRegister(statementPtr[1]);
+            memory.setRegister(statementPtr[1], a > b ? 1 : 0);
+            nextStatementIndex += 4;          
         });
-        humanReadableCodes["JPGE"] = optCode++;
+        humanReadableCodes["CMPG"] = optCode++;
 
-        //JPLE    L 
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            if(memory.getLess() || memory.getEqual()){
-                memory.resetCompare();
-                nextLine = args[0];
-            }
-            else{
-                nextLine++;
-            }
+        //CMGE     REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            int a = memory.getRegister(statementPtr[0]);
+            int b = memory.getRegister(statementPtr[1]);
+            memory.setRegister(statementPtr[1], a >= b ? 1 : 0);
+            nextStatementIndex += 4;          
         });
-        humanReadableCodes["JPLE"] = optCode++;
+        humanReadableCodes["CMGE"] = optCode++;
 
         //JMP     L
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
-            nextLine = args[0];
-            nextLine++;
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            nextStatementIndex = statementPtr[0];
         });
         humanReadableCodes["JMP"] = optCode++;
 
+        //JMPC     L REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            if(memory.getRegister(statementPtr[1]) > 0)
+                nextStatementIndex = statementPtr[0];
+            else
+                nextStatementIndex += 3;   
+        });
+        humanReadableCodes["JMPC"] = optCode++;
+
         //DBG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.print();
-            nextLine++;
+            nextStatementIndex += 1;   
         });
         humanReadableCodes["DBG"] = optCode++;
 
         //END
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end) { 
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end) { 
             end = true; 
         });
         humanReadableCodes["END"] = optCode++;
 
-        //AND     REG REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
+        //AND     REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
-                args[0], 
-                memory.getRegister(args[0]) > 0 && memory.getRegister(args[1]) > 0 ? 1 : 0
+                statementPtr[0], 
+                memory.getRegister(statementPtr[0]) > 0 && memory.getRegister(statementPtr[1]) > 0 ? 1 : 0
             );
-            nextLine++;
+            nextStatementIndex += 4;   
         });
         humanReadableCodes["AND"] = optCode++;
 
-        //OR      REG REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
+        //OR      REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
-                args[0], 
-                memory.getRegister(args[0]) > 0 || memory.getRegister(args[1]) > 0 ? 1 : 0
+                statementPtr[0], 
+                memory.getRegister(statementPtr[0]) > 0 || memory.getRegister(statementPtr[1]) > 0 ? 1 : 0
             );
-            nextLine++;
+            nextStatementIndex += 4;   
         });
         humanReadableCodes["OR"] = optCode++;
 
-        //XOR     REG REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
+        //XOR     REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
-                args[0], 
-                memory.getRegister(args[0]) > 0 ^ memory.getRegister(args[1]) > 0 ? 1 : 0
+                statementPtr[0], 
+                memory.getRegister(statementPtr[0]) > 0 ^ memory.getRegister(statementPtr[1]) > 0 ? 1 : 0
             );
-            nextLine++;
+            nextStatementIndex += 4;
         });
         humanReadableCodes["XOR"] = optCode++;
 
-        //NOT     REG REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
+        //NOT     REG REG REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
-                args[0], 
-                memory.getRegister(args[0]) > 0 ? 0 : 1
+                statementPtr[0], 
+                memory.getRegister(statementPtr[0]) > 0 ? 0 : 1
             );
-            nextLine++;
+            nextStatementIndex += 4;
         });
         humanReadableCodes["NOT"] = optCode++;
 
         //PUSH    REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             throw std::runtime_error("Not implemented" + BT); //TODO: Not implemented
-            nextLine++;
+            nextStatementIndex += 2;  
         });
         humanReadableCodes["PUSH"] = optCode++;
 
         //POP     REG
-        operations.push_back([](unsigned char* args, Memory& memory, int& nextLine, bool& end){
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             throw std::runtime_error("Not implemented" + BT); //TODO: Not implemented
-            nextLine++;
+            nextStatementIndex += 2;
         });
         humanReadableCodes["POP"] = optCode++;
 
@@ -248,6 +229,9 @@ class OptCodeEngine{
 
         //; COMMENT
         //humanReadableCodes[";"] = optCode++;
+
+        for (auto& t : humanReadableCodes)
+            optToReadable[t.second] = t.first;
     }
 
     unsigned char encodeOptString(std::string str){
@@ -260,8 +244,18 @@ class OptCodeEngine{
         return humanReadableCodes[str];
     }
 
-    Operation getOperation(unsigned char code){
-        return operations[code];
+    std::string disassambleOptCode(unsigned char code){
+        if(optToReadable.find(code) == optToReadable.end())
+            throw std::runtime_error("Code not defined for disassambleOptCode: " + std::to_string(code) + " " + BT);
+
+        return optToReadable[code];
     }
 
+    Operation getOperation(unsigned char code){
+        //TODO: Remove, this is expensive
+        if(code > operations.size() || code < 0)
+            throw std::runtime_error("Code not defined for getOperation: " + std::to_string(code) + " " + BT);
+
+        return operations[code];
+    }
 };
