@@ -29,4 +29,8 @@ class Memory{
         for (auto& t : registers)
             std::cout << t.first << "\t\t" << t.second << std::endl;
     }
+
+    int getSize(){
+        return registers.size();
+    }
 };

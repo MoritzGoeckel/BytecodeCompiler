@@ -24,6 +24,8 @@ namespace VirtualMachine{
             e.getOperation(opt)(byteArray + nextStatementIndex + 1, m, nextStatementIndex, end);
             //std::cout << "-> " << std::to_string(opt) << " " << e.disassambleOptCode(opt) << " " << std::to_string(nextStatementIndex) << " " << std::to_string(end) << std::endl;
         }
+
+        std::cout << "Used " << std::to_string(m.getSize()) << " registers" << std::endl;
     }
 
 }
