@@ -101,7 +101,7 @@ class OptCodeEngine{
         operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
-            memory.setRegister(statementPtr[1], a == b ? 1 : 0);
+            memory.setRegister(statementPtr[2], a == b ? 1 : 0);
             nextStatementIndex += 4;          
         });
         humanReadableCodes["CMPE"] = optCode++;
@@ -110,7 +110,7 @@ class OptCodeEngine{
         operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
-            memory.setRegister(statementPtr[1], a < b ? 1 : 0);
+            memory.setRegister(statementPtr[2], a < b ? 1 : 0);
             nextStatementIndex += 4;          
         });
         humanReadableCodes["CMPL"] = optCode++;
@@ -119,7 +119,7 @@ class OptCodeEngine{
         operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
-            memory.setRegister(statementPtr[1], a <= b ? 1 : 0);
+            memory.setRegister(statementPtr[2], a <= b ? 1 : 0);
             nextStatementIndex += 4;         
         });
         humanReadableCodes["CMLE"] = optCode++;
@@ -128,7 +128,7 @@ class OptCodeEngine{
         operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
-            memory.setRegister(statementPtr[1], a > b ? 1 : 0);
+            memory.setRegister(statementPtr[2], a > b ? 1 : 0);
             nextStatementIndex += 4;          
         });
         humanReadableCodes["CMPG"] = optCode++;
@@ -137,7 +137,7 @@ class OptCodeEngine{
         operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
-            memory.setRegister(statementPtr[1], a >= b ? 1 : 0);
+            memory.setRegister(statementPtr[2], a >= b ? 1 : 0);
             nextStatementIndex += 4;          
         });
         humanReadableCodes["CMGE"] = optCode++;
@@ -223,6 +223,16 @@ class OptCodeEngine{
             nextStatementIndex += 2;
         });
         humanReadableCodes["POP"] = optCode++;
+
+        //INCR     REG
+        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            memory.setRegister(
+                statementPtr[0], 
+                memory.getRegister(statementPtr[0]) + 1
+            );
+            nextStatementIndex += 2;
+        });
+        humanReadableCodes["INCR"] = optCode++;
 
         //LABEL   L
         //humanReadableCodes["LABEL"] = optCode++;

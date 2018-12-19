@@ -20,10 +20,9 @@ namespace VirtualMachine{
 
         while(!end){
             unsigned char opt = byteArray[nextStatementIndex];
-
-            std::cout << "Before " << std::to_string(opt) << " " << e.disassambleOptCode(opt) << " " << std::to_string(nextStatementIndex) << " " << std::to_string(end) << std::endl;
+            //std::cout << "Before " << std::to_string(opt) << " " << e.disassambleOptCode(opt) << " " << std::to_string(nextStatementIndex) << " " << std::to_string(end) << std::endl;
             e.getOperation(opt)(byteArray + nextStatementIndex + 1, m, nextStatementIndex, end);
-            std::cout << "After  " << std::to_string(opt) << " " << e.disassambleOptCode(opt) << " " << std::to_string(nextStatementIndex) << " " << std::to_string(end) << std::endl;
+            //std::cout << "-> " << std::to_string(opt) << " " << e.disassambleOptCode(opt) << " " << std::to_string(nextStatementIndex) << " " << std::to_string(end) << std::endl;
         }
     }
 

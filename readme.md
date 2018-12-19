@@ -25,6 +25,8 @@ SUB     REG REG REG
 MUL     REG REG REG
 DIV     REG REG REG
 
+INCR    REG
+
 OUT     REG
 ASK     REG
 
