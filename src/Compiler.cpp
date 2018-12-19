@@ -30,8 +30,10 @@ void compileFile(std::string inPath, std::string outPath){
     ByteCode code;
 
     std::map<std::string, int> labels;
-
     std::vector<std::string> lines;
+
+    unsigned char nextVariableId = 0;
+    std::map<std::string, unsigned char> variables;
 
     for(std::string line; getline(inFile, line);)
         lines.push_back(line);
@@ -47,7 +49,7 @@ void compileFile(std::string inPath, std::string outPath){
             if(labels.find(tokens[0]) != labels.end())
                 throw std::runtime_error("Label already declared" + BT);
 
-            labels[tokens[0]] = codeIndex; // -1?
+            labels[tokens[0]] = codeIndex;
             lines.erase(lines.begin() + lineIndex);
             lineIndex--;
         }
@@ -74,21 +76,33 @@ void compileFile(std::string inPath, std::string outPath){
             if(labels.find(tokens[1]) == labels.end())
                 throw std::runtime_error("Unknown label" + BT);
 
-            //std::cout << "Found label link " << labels[tokens[1]] << std::endl;
             tokens[1] = std::to_string(labels[tokens[1]]);
         }
 
         if(tokens[0].back() == ':')
             throw std::runtime_error("Labels should be removed by now" + BT);
 
-        //TODO: Remove
         //std::cout << "CMD: " << tokens[0] << "\tP1: " << tokens[1] << "\tP2: " << tokens[2] << std::endl;
 
         //Statement
-        //Todo: Dont know how long statements are
         code.add(opts.encodeOptString(tokens[0]));
         for(int i = 1; i < tokens.size(); i++){
-            code.add(stoi(tokens[i]));
+            if(tokens[i].front() == '%'){
+                //Its a variable
+                std::string name = tokens[i];
+                unsigned char id;
+                if(variables.find(name) == variables.end()){
+                    //Its a new one
+                    variables[name] = nextVariableId++;
+                    //std::cout << "new! " << name << " " << std::to_string(variables[name]) << std::endl; 
+                }
+                code.add(variables[name]);
+                //std::cout << name << " " << std::to_string(variables[name]) << std::endl; 
+            }
+            else{
+                //Its a value
+                code.add(stoi(tokens[i]));
+            }
         }
     }
 

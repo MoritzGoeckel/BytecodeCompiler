@@ -1,8 +1,8 @@
-LOAD 3 99
-LOAD 10 98
+LOAD 3 %a
+LOAD 10 %b
 while:
-INCR 99
-OUT 99
-CMPL 99 98 97
-JMPC while 97
+INCR %a
+OUT %a
+CMPL %a %b %cont
+JMPC while %cont
 END
