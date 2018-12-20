@@ -10,10 +10,12 @@
 #include "Compiler.cpp"
 #include "VirtualMachine.cpp"
 
+#include "Types.cpp"
+
 #include "gtest/gtest.h"
 
 TEST(Writer, WriteFileTest) {
-  std::vector<unsigned char> outData = {15, 30};
+  std::vector<int8> outData = {15, 30};
   ByteCode outCode(outData);
   outCode.write("testfile_vec.bc");
 

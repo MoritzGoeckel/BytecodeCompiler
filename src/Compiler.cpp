@@ -10,6 +10,8 @@
 
 #include "ErrorHandling.cpp"
 
+#include "Types.cpp"
+
 #include "OptCodeEngine.cpp"
 #include "ByteCode.cpp"
 
@@ -32,8 +34,8 @@ void compileFile(std::string inPath, std::string outPath){
     std::map<std::string, int> labels;
     std::vector<std::string> lines;
 
-    unsigned char nextVariableId = 0;
-    std::map<std::string, unsigned char> variables;
+    int8 nextVariableId = 0;
+    std::map<std::string, int8> variables;
 
     for(std::string line; getline(inFile, line);)
         lines.push_back(line);
@@ -90,7 +92,7 @@ void compileFile(std::string inPath, std::string outPath){
             if(tokens[i].front() == '%'){
                 //Its a variable
                 std::string name = tokens[i];
-                unsigned char id;
+                int8 id;
                 if(variables.find(name) == variables.end()){
                     //Its a new one
                     variables[name] = nextVariableId++;

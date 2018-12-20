@@ -3,24 +3,26 @@
 #include <map>
 #include <iostream>
 
+#include "Types.cpp"
+
 #include "ErrorHandling.cpp"
 
 class Memory{
 
     private:
-    std::map<unsigned int, int> registers;
+    std::map<int8, int> registers;
     // TODO: Should just use an array
 
     public:
     Memory(){
-        registers = std::map<unsigned int, int>();
+        registers = std::map<int8, int>();
     }
 
-    int getRegister(unsigned int id){
+    int getRegister(int8 id){
         return registers[id];
     }
 
-    void setRegister(unsigned int id, int value){
+    void setRegister(int8 id, int value){
         registers[id] = value;
     }
 

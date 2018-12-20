@@ -5,16 +5,18 @@
 #include <string>
 #include <vector>
 
+#include "Types.cpp"
+
 #include "ErrorHandling.cpp"
 
 class OptCodeEngine{
 
     private:
 
-    std::map<std::string, unsigned char> humanReadableCodes;
-    std::map<unsigned char, std::string> optToReadable;
+    std::map<std::string, int8> humanReadableCodes;
+    std::map<int8, std::string> optToReadable;
 
-    typedef void (*Operation)(unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end);
+    typedef void (*Operation)(int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end);
     std::vector<Operation> operations;
 
     public:
@@ -23,28 +25,28 @@ class OptCodeEngine{
         int optCode = 0;
 
         //LOAD    L   REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(statementPtr[1], statementPtr[0]);
             nextStatementIndex += 3;
         });
         humanReadableCodes["LOAD"] = optCode++;
 
         //MOVE    REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(statementPtr[1], memory.getRegister(statementPtr[0]));
             nextStatementIndex += 3;
         });
         humanReadableCodes["MOVE"] = optCode++;
 
         //INCR    REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
                 memory.setRegister(statementPtr[0], memory.getRegister(statementPtr[0]) + 1);
                 nextStatementIndex += 2;
         });
         humanReadableCodes["INCR"] = optCode++;
 
         //ADD     REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
                 statementPtr[0], 
                 memory.getRegister(statementPtr[0]) + memory.getRegister(statementPtr[1])
@@ -54,7 +56,7 @@ class OptCodeEngine{
         humanReadableCodes["ADD"] = optCode++;
 
         //SUB     REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
                 statementPtr[0], 
                 memory.getRegister(statementPtr[0]) - memory.getRegister(statementPtr[1])
@@ -64,7 +66,7 @@ class OptCodeEngine{
         humanReadableCodes["SUB"] = optCode++;
 
         //MUL     REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
                 statementPtr[0], 
                 memory.getRegister(statementPtr[0]) * memory.getRegister(statementPtr[1])
@@ -74,7 +76,7 @@ class OptCodeEngine{
         humanReadableCodes["MUL"] = optCode++;
 
         //DIV     REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
                 statementPtr[0], 
                 memory.getRegister(statementPtr[0]) / memory.getRegister(statementPtr[1])
@@ -84,21 +86,21 @@ class OptCodeEngine{
         humanReadableCodes["DIV"] = optCode++;
 
         //OUT     REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             std::cout << memory.getRegister(statementPtr[0]) << std::endl;
             nextStatementIndex += 2;
         });
         humanReadableCodes["OUT"] = optCode++;
 
         //ASK     REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             throw std::runtime_error("Not implemented" + BT); //TODO: Not implemented
             nextStatementIndex += 2;
         });
         humanReadableCodes["ASK"] = optCode++;
 
         //CMPE     REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
             memory.setRegister(statementPtr[2], a == b ? 1 : 0);
@@ -107,7 +109,7 @@ class OptCodeEngine{
         humanReadableCodes["CMPE"] = optCode++;
         
         //CMPL     REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
             memory.setRegister(statementPtr[2], a < b ? 1 : 0);
@@ -116,7 +118,7 @@ class OptCodeEngine{
         humanReadableCodes["CMPL"] = optCode++;
 
         //CMLE     REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
             memory.setRegister(statementPtr[2], a <= b ? 1 : 0);
@@ -125,7 +127,7 @@ class OptCodeEngine{
         humanReadableCodes["CMLE"] = optCode++;
 
         //CMPG     REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
             memory.setRegister(statementPtr[2], a > b ? 1 : 0);
@@ -134,7 +136,7 @@ class OptCodeEngine{
         humanReadableCodes["CMPG"] = optCode++;
 
         //CMGE     REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
             memory.setRegister(statementPtr[2], a >= b ? 1 : 0);
@@ -143,13 +145,13 @@ class OptCodeEngine{
         humanReadableCodes["CMGE"] = optCode++;
 
         //JMP     L
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             nextStatementIndex = statementPtr[0];
         });
         humanReadableCodes["JMP"] = optCode++;
 
         //JMPC     L REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             if(memory.getRegister(statementPtr[1]) > 0)
                 nextStatementIndex = statementPtr[0];
             else
@@ -158,20 +160,20 @@ class OptCodeEngine{
         humanReadableCodes["JMPC"] = optCode++;
 
         //DBG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.print();
             nextStatementIndex += 1;   
         });
         humanReadableCodes["DBG"] = optCode++;
 
         //END
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end) { 
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end) { 
             end = true; 
         });
         humanReadableCodes["END"] = optCode++;
 
         //AND     REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
                 statementPtr[0], 
                 memory.getRegister(statementPtr[0]) > 0 && memory.getRegister(statementPtr[1]) > 0 ? 1 : 0
@@ -181,7 +183,7 @@ class OptCodeEngine{
         humanReadableCodes["AND"] = optCode++;
 
         //OR      REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
                 statementPtr[0], 
                 memory.getRegister(statementPtr[0]) > 0 || memory.getRegister(statementPtr[1]) > 0 ? 1 : 0
@@ -191,7 +193,7 @@ class OptCodeEngine{
         humanReadableCodes["OR"] = optCode++;
 
         //XOR     REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
                 statementPtr[0], 
                 memory.getRegister(statementPtr[0]) > 0 ^ memory.getRegister(statementPtr[1]) > 0 ? 1 : 0
@@ -201,7 +203,7 @@ class OptCodeEngine{
         humanReadableCodes["XOR"] = optCode++;
 
         //NOT     REG REG REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
                 statementPtr[0], 
                 memory.getRegister(statementPtr[0]) > 0 ? 0 : 1
@@ -211,21 +213,21 @@ class OptCodeEngine{
         humanReadableCodes["NOT"] = optCode++;
 
         //PUSH    REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             throw std::runtime_error("Not implemented" + BT); //TODO: Not implemented
             nextStatementIndex += 2;  
         });
         humanReadableCodes["PUSH"] = optCode++;
 
         //POP     REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             throw std::runtime_error("Not implemented" + BT); //TODO: Not implemented
             nextStatementIndex += 2;
         });
         humanReadableCodes["POP"] = optCode++;
 
         //INCR     REG
-        operations.push_back([](unsigned char* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
                 statementPtr[0], 
                 memory.getRegister(statementPtr[0]) + 1
@@ -244,7 +246,7 @@ class OptCodeEngine{
             optToReadable[t.second] = t.first;
     }
 
-    unsigned char encodeOptString(std::string str){
+    int8 encodeOptString(std::string str){
         if(str == "LABEL" || str == ";")
             throw std::runtime_error("Labels should be removed by now" + BT); //Label and comments should be removed by now
 
@@ -254,14 +256,14 @@ class OptCodeEngine{
         return humanReadableCodes[str];
     }
 
-    std::string disassambleOptCode(unsigned char code){
+    std::string disassambleOptCode(int8 code){
         if(optToReadable.find(code) == optToReadable.end())
             throw std::runtime_error("Code not defined for disassambleOptCode: " + std::to_string(code) + " " + BT);
 
         return optToReadable[code];
     }
 
-    Operation getOperation(unsigned char code){
+    Operation getOperation(int8 code){
         //TODO: Remove, this is expensive
         if(code > operations.size() || code < 0)
             throw std::runtime_error("Code not defined for getOperation: " + std::to_string(code) + " " + BT);

@@ -8,21 +8,23 @@
 #include <vector>
 #include <string>
 
+#include "Types.cpp"
+
 #include "ErrorHandling.cpp"
 
 class ByteCode{
 
     private:
 
-    std::vector<unsigned char> data;
+    std::vector<int8> data;
 
     public:
 
     ByteCode(){
-        this->data = std::vector<unsigned char>();
+        this->data = std::vector<int8>();
     }
 
-    ByteCode(std::vector<unsigned char>& data){
+    ByteCode(std::vector<int8>& data){
         this->data = data;
     }
 
@@ -56,16 +58,16 @@ class ByteCode{
         delete[] buffer;
     }
 
-    void add(unsigned char code){
+    void add(int8 code){
         //std::cout << "Got code: " << std::to_string(code) << std::endl;
         data.push_back(code);
     }
 
-    unsigned char getAt(int index){
+    int8 getAt(int index){
         return data.at(index);
     }
 
-    unsigned char* getRaw(){
+    int8* getRaw(){
         return &data[0];
     }
 
