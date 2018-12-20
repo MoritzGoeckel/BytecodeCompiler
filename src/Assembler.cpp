@@ -8,9 +8,8 @@
 
 #include <sstream>
 
-#include "ErrorHandling.cpp"
-
 #include "Types.cpp"
+#include "ErrorHandling.cpp"
 
 #include "OptCodeEngine.cpp"
 #include "ByteCode.cpp"

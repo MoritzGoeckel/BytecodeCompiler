@@ -5,12 +5,11 @@
 #include "Memory.cpp"
 #include "ByteCode.cpp"
 
+#include "Types.cpp"
 #include "ErrorHandling.cpp"
 
 #include "Assembler.cpp"
 #include "Executer.cpp"
-
-#include "Types.cpp"
 
 #include "gtest/gtest.h"
 
