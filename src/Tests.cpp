@@ -7,8 +7,8 @@
 
 #include "ErrorHandling.cpp"
 
-#include "Compiler.cpp"
-#include "VirtualMachine.cpp"
+#include "Assembler.cpp"
+#include "Executer.cpp"
 
 #include "Types.cpp"
 
@@ -28,13 +28,13 @@ TEST(Writer, WriteFileTest) {
 }
 
 TEST(Compiler, ReadAndCompile) {
-  compileFile("testfile.ma", "testfile.bc");
+  assembleFile("testfile.ma", "testfile.bc");
 }
 
 TEST(MVM, ReadAndExecute) {
   ByteCode code;
   code.read("testfile.bc");
-  VirtualMachine::execute(code);
+  execute(code);
   std::cout << "Done executing" << std::endl;
 }
 

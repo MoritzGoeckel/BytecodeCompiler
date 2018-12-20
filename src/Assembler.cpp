@@ -25,7 +25,7 @@ static void split(const std::string& str, std::vector<std::string>& cont, char d
     }
 }
 
-void compileFile(std::string inPath, std::string outPath){
+void assembleFile(std::string inPath, std::string outPath){
     std::ifstream inFile(inPath);
 
     OptCodeEngine opts;
