@@ -8,5 +8,6 @@ CMakeCache.txt
 
 *.bytes
 *.bc
+*.swp
 
 tags

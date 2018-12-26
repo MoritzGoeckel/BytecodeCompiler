@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "Types.cpp"
-#include "ErrorHandling.cpp"
+#include "../ErrorHandling.cpp"
 
 class Memory{
 

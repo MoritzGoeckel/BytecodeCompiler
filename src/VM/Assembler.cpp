@@ -9,7 +9,7 @@
 #include <sstream>
 
 #include "Types.cpp"
-#include "ErrorHandling.cpp"
+#include "../ErrorHandling.cpp"
 
 #include "OptCodeEngine.cpp"
 #include "ByteCode.cpp"

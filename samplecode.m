@@ -1,0 +1,3 @@
+main = (){
+    return a + b;
+};

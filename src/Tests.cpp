@@ -1,15 +1,17 @@
 #include <iostream>
 #include <vector>
 
-#include "OptCodeEngine.cpp"
-#include "Memory.cpp"
-#include "ByteCode.cpp"
+#include "VM/OptCodeEngine.cpp"
+#include "VM/Memory.cpp"
+#include "VM/ByteCode.cpp"
 
-#include "Types.cpp"
+#include "VM/Types.cpp"
 #include "ErrorHandling.cpp"
 
-#include "Assembler.cpp"
-#include "Executer.cpp"
+#include "VM/Assembler.cpp"
+#include "VM/Executer.cpp"
+
+#include "Interpreter/Lexer.cpp"
 
 #include "gtest/gtest.h"
 
@@ -37,6 +39,15 @@ TEST(MVM, ReadAndExecute) {
   std::cout << "Done executing" << std::endl;
 }
 
+TEST(Lexxer, LexerTest) {
+  Lexer l("samplecode.m");
+  
+  while(!l.eof()){
+    l.getNextToken().print();
+  }
+
+  std::cout << "Done executing" << std::endl;
+}
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
