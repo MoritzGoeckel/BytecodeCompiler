@@ -14,6 +14,7 @@ int SEMIC = 7;
 int COMP = 8;
 int ASSIGN = 9;
 int IDENT = 10;
+int BRANCH = 10;
 
 class Token{
     
@@ -51,6 +52,7 @@ class Token{
         types.push_back("COMP");
         types.push_back("ASSIGN");
         types.push_back("IDENT");
+        types.push_back("BRANCH");
         
         return types[type];
     }
