@@ -12,6 +12,7 @@
 #include "VM/Executer.cpp"
 
 #include "Interpreter/Lexer.cpp"
+#include "Interpreter/Parser.cpp"
 
 #include "gtest/gtest.h"
 

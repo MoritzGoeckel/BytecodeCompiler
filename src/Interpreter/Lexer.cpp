@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Token.cpp"
 #include <string>
 #include <fstream>
@@ -12,7 +14,7 @@ class Lexer{
     
     public:
     
-    Lexer(std::string path){
+    Lexer(const std::string& path){
         this->index = 0;
 
         std::ifstream t(path);
@@ -31,16 +33,16 @@ class Lexer{
         if(getChar() == '(') { consume(); return Token(OBR, "("); }
         if(getChar() == ')') { consume(); return Token(CBR, ")"); }
 
-        if(getChar() == '+') { consume(); return Token(IOP, "+"); }
-        if(getChar() == '-') { consume(); return Token(IOP, "-"); }
-        if(getChar() == '/') { consume(); return Token(IOP, "/"); }
-        if(getChar() == '*') { consume(); return Token(IOP, "*"); }
+        if(getChar() == '+') { consume(); return Token(INFOP, "+"); }
+        if(getChar() == '-') { consume(); return Token(INFOP, "-"); }
+        if(getChar() == '/') { consume(); return Token(INFOP, "/"); }
+        if(getChar() == '*') { consume(); return Token(INFOP, "*"); }
     
-        if(matches("return")) { consume("return"); return Token(RET, "return"); }
+        if(matches("return")) { consume("return"); return Token(RETURN, "return"); }
         if(matches("if")) { consume("if"); return Token(BRANCH, "if"); }
         if(matches("while")) { consume("while"); return Token(BRANCH, "while"); }
         
-        if(getChar() == ',') { consume(); return Token(COM, ","); } 
+        if(getChar() == ',') { consume(); return Token(COMMA, ","); } 
         if(getChar() == ';') { consume(); return Token(SEMIC, ";"); }
 
         if(matches("==")) { consume("=="); return Token(COMP, "=="); }
@@ -49,10 +51,12 @@ class Lexer{
         if(getChar() == '<') { consume(); return Token(COMP, "<"); }
         
         if(getChar() == '=') { consume(); return Token(ASSIGN, "="); }
-        
-        //Identifier!
-        std::string identifier = consumeIdentificator();  
-        return Token(IDENT, identifier);
+      
+        if(isdigit(getChar()))
+            return Token(NUMLIT, consumeAlphanumWord());
+
+        if(isalpha(getChar()))
+            return Token(IDENT, consumeAlphanumWord());
 
         //Will never happen
         throw std::runtime_error("Token unknown: " + std::string(1, getChar()) + BT);
@@ -106,7 +110,7 @@ class Lexer{
         }
     }
 
-    std::string consumeIdentificator(){
+    std::string consumeAlphanumWord(){
         std::string output = "";
         while(true){
             char c = this->getChar();

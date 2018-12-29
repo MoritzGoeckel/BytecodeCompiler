@@ -1,3 +1,4 @@
 main = (){
-    return a + b;
+    main();
+    return a + b * 42;
 };
