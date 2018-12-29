@@ -43,9 +43,19 @@ TEST(MVM, ReadAndExecute) {
 TEST(Lexxer, LexerTest) {
   Lexer l("samplecode.m");
   
-  while(!l.eof()){
+  while(!l.eof())
     l.getNextToken().print();
-  }
+}
+
+TEST(Paarser, ParserTest) {
+  Lexer l("samplecode.m");
+  
+  std::vector<Token> tokens;
+  while(!l.eof())
+    tokens.push_back(l.getNextToken());
+
+  Parser p(tokens);
+  ASTNode n = p.parse();
 
   std::cout << "Done executing" << std::endl;
 }

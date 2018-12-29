@@ -1,4 +1,8 @@
-main = (){
+{
+    main = (){
+        main();
+        return a + b * 42;
+    };
+    
     main();
-    return a + b * 42;
-};
+}
