@@ -1,0 +1,36 @@
+TOKEN('BLOCK', '') 
+{ 
+    TOKEN('ASSIGN', '=') 
+    { 
+        TOKEN('IDENT', 'main') 
+        TOKEN('FUNDEF', '') 
+        { 
+            TOKEN('IDENTLIST', '') 
+            TOKEN('BLOCK', '') 
+            { 
+                TOKEN('CALL', '') 
+                { 
+                    TOKEN('IDENT', 'main') 
+                    TOKEN('EXPRESSIONLIST', '')  
+                }
+                TOKEN('RETURN', 'return') 
+                { 
+                    TOKEN('INFOP', '+') 
+                    { 
+                        TOKEN('IDENT', 'a') 
+                        TOKEN('INFOP', '*') 
+                        { 
+                            TOKEN('IDENT', 'b') 
+                            TOKEN('NUMLIT', '42')  
+                        } 
+                    } 
+                } 
+            } 
+        } 
+    }
+    TOKEN('CALL', '') 
+    { 
+        TOKEN('IDENT', 'main') 
+        TOKEN('EXPRESSIONLIST', '')  
+    } 
+}

@@ -35,7 +35,7 @@ class Parser{
     }
 
     const Token& consume(){
-        std::cout << "Consume index " << std::to_string(index) << " " << typeToString(getToken().getType()) << std::endl;
+        //std::cout << "Consume index " << std::to_string(index) << " " << typeToString(getToken().getType()) << std::endl;
         return tokens[index++];
     }
 
@@ -49,13 +49,13 @@ class Parser{
     }
 
     void mark(){
-        std::cout << "Mark index " << std::to_string(index)  << " " << typeToString(getToken().getType()) << std::endl;
+        //std::cout << "Mark index " << std::to_string(index)  << " " << typeToString(getToken().getType()) << std::endl;
         markers.push_back(this->index); 
     }
 
     void reset(){
         this->index = markers.back();
-        std::cout << "Reset to " << std::to_string(index) << " " << typeToString(getToken().getType()) << std::endl;
+        //std::cout << "Reset to " << std::to_string(index) << " " << typeToString(getToken().getType()) << std::endl;
         markers.pop_back();
     }
 
@@ -89,13 +89,7 @@ bool Parser::speculate(ParserFn fn){
     return success;
 }
 
-//    std::cout << "ASSIGNMENT FIRST " << typeToString(getToken().getType()) << std::endl;
-//    std::cout << "ASSIGNMENT SECOND " << typeToString(LA(1).getType()) << std::endl;
-//    std::cout << "ASSIGNMENT SECOND " << typeToString(LA(2).getType()) << std::endl;
-
 ASTNode Parser::statement(){
-
-    std::cout << "STATEMENT!" << std::endl;
 
     if(speculate(&Parser::block))
         return block();
@@ -133,13 +127,10 @@ ASTNode Parser::block(){
     }
     consume(CCBR);
 
-    std::cout << "BLOCK!" << std::endl;
     return node;
 }
 
 ASTNode Parser::expression(){
-
-    std::cout << "EXPR!" << std::endl;
 
     if(speculate(&Parser::assignment))
         return assignment();
@@ -150,7 +141,7 @@ ASTNode Parser::expression(){
     if(speculate(&Parser::call))
         return call();
 
-    //TODO: This is bad infinite recursion
+    //TODO: This is one is dangerous for infinite recursion
     if(speculate(&Parser::infixOperation))
         return infixOperation();
 
@@ -172,7 +163,6 @@ ASTNode Parser::assignment(){
     node.addChild(leftSide);
     node.addChild(rightSide);
 
-    std::cout << "ASSIGNMENT!" << std::endl;
     return node;
 }
 
@@ -181,7 +171,6 @@ ASTNode Parser::branch(){
     node.addChild(expression());
     node.addChild(block());
 
-    std::cout << "BRANCH!" << std::endl;
     return node;
 }
 
@@ -189,25 +178,18 @@ ASTNode Parser::ret(){
     ASTNode node(ASTNode(consume(RETURN)));
     node.addChild(expression());
 
-    std::cout << "RETURN!" << std::endl;
     return node;
 }
 
 ASTNode Parser::infixOperation(){
     ASTNode left = operand();
-    std::cout << "left done" << std::endl;
-    std::cout << "next: " << typeToString(getToken().getType()) << std::endl;
-
     Token op = consume(INFOP);
-    std::cout << "op done" << std::endl;
-
     ASTNode right = expression();
 
     ASTNode node(op);
     node.addChild(left);
     node.addChild(right);
 
-    std::cout << "INFIX OPERATION!" << std::endl;
     return node;
 }
 
@@ -241,7 +223,6 @@ ASTNode Parser::functionDefinition(){
     node.addChild(identifierList);
     node.addChild(block());
 
-    std::cout << "FUNCTION DEFINITION!" << std::endl;
     return node;
 }
 
@@ -261,7 +242,5 @@ ASTNode Parser::call(){
     consume(CBR);
 
     node.addChild(expressionList);
-
-    std::cout << "FUNCTION CALL!" << std::endl;
     return node;
 }

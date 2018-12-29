@@ -56,6 +56,7 @@ TEST(Paarser, ParserTest) {
 
   Parser p(tokens);
   ASTNode n = p.parse();
+  n.print();
 
   std::cout << "Done executing" << std::endl;
 }

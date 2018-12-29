@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
 #include "Token.cpp"
 
 class ASTNode{
@@ -22,5 +23,15 @@ class ASTNode{
 
     void addChild(ASTNode node){
         children.push_back(node);
+    }
+
+    void print() const{
+        token.print();
+        if(children.size() != 0){
+            std::cout << "{ ";
+            for(auto const& t: children)
+                t.print();
+            std::cout << " }";
+        }
     }
 };
