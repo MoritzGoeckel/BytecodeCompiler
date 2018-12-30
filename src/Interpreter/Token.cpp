@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 
+#include "../ErrorHandling.cpp"
+
 std::string typeToString(int type){
     std::vector<std::string> types;
     types.push_back("OCBR");
@@ -68,7 +70,23 @@ class Token{
     }
 
     void print() const{
-        std::cout << "TOKEN('" << typeToString(type) << "', '" << text << "') "; 
+        std::cout << typeToString(type) << "('" << text << "') "; 
+    }
+
+    int getPrecedence() const{
+        if(getType() != INFOP)
+            throw std::runtime_error("NON OP HAS NO PRECEDENCE: " + typeToString(getType()) + BT);
+
+        if(getText() == "*" || getText() == "/")
+            return 5;
+
+        if(getText() == "+" || getText() == "-")
+            return 6;
+
+        if(getText() == "=")
+            return 7;
+
+        throw std::runtime_error("Precedence not defined for: " + getText() + BT);
     }
 
     private: 

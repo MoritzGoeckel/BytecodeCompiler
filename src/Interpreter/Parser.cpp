@@ -163,31 +163,75 @@ ASTNode Parser::infixOperation(){
 
     //TODO: Maybe use custom algorithm here
     //Stack based with precedence and until semicolon
+    bool withinBrackets = false;
+    if(getToken().getType() == OBR){
+        consume(OBR);
+        withinBrackets = true;
+    }
 
-    ASTNode left = operand();
-    Token op = consume(INFOP);
-    ASTNode right = expression();
+    bool expectingOperand = true;
 
-    //If its an assignment left should be an identification
-    if(op.getText() == "=" && left.getToken().getType() != IDENT)
-        throw ParsingException("IDENT", typeToString(left.getToken().getType()), BT);    
+    std::vector<ASTNode> stack;
+    while(true){
+        //OPERAND
+        if(speculate(&Parser::operand) && expectingOperand){
+            stack.push_back(operand());
+            expectingOperand = false;
+        }
+        //OPERATOR
+        else if(getToken().getType() == INFOP && !expectingOperand){
+            stack.push_back(ASTNode(consume(INFOP)));
+            expectingOperand = true;
+        }
+        //Open brackets
+        else if(getToken().getType() == OBR){
+            stack.push_back(infixOperation());
+            expectingOperand = false;
+        }
+        else{
+            break;    
+        }
+    }
 
-    ASTNode node(op);
-    node.addChild(left);
-    node.addChild(right);
+    if(withinBrackets)
+        consume(CBR);
 
-    return node;
+    if(stack.size() < 3 || stack.size() % 2 == 0)
+        throw ParsingException("BAD STACK SIZE", "", BT);
+
+    while(stack.size() > 1){
+        for(int i = 1; i < stack.size(); i += 2){
+            if(i + 2 >= stack.size() || stack[i].getToken().getPrecedence() <= stack[i + 2].getToken().getPrecedence()){
+                //Reduce
+                ASTNode node = stack[i];
+                node.addChild(stack[i - 1]);
+                node.addChild(stack[i + 1]);
+
+                stack.erase(stack.begin() + i - 1, stack.begin() + i + 2);
+                stack.insert(stack.begin() + i - 1, node);
+            }
+        }
+    }
+
+    if(stack.size() != 1)
+        throw ParsingException("Stack size should be 1 but is " + std::to_string(stack.size()), "", BT);
+
+    return stack[0];
 }
 
 ASTNode Parser::operand(){
+
+    if(speculate(&Parser::functionDefinition))
+        return functionDefinition();
+
+    if(speculate(&Parser::call))
+        return call();
+
     if(getToken().getType() == NUMLIT)
         return ASTNode(consume(NUMLIT));
 
     if(getToken().getType() == IDENT)
         return ASTNode(consume(IDENT));
-
-    if(speculate(&Parser::call))
-        return call();
 
     throw ParsingException("NUMLITERAL, IDENTIFIER, CALL", typeToString(getToken().getType()), BT);    
 }
@@ -215,9 +259,10 @@ ASTNode Parser::functionDefinition(){
 ASTNode Parser::call(){
     ASTNode node(Token(CALL, ""));
     node.addChild(consume(IDENT));
-
+    
     ASTNode expressionList(Token(EXPRESSIONLIST, ""));
     consume(OBR);
+    
     while(speculate(&Parser::expression)){
         expressionList.addChild(expression());
         if(getToken().getType() == COMMA)
