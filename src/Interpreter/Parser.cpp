@@ -95,13 +95,13 @@ ASTNode Parser::statement(){
 
     else if(speculate(&Parser::ret)){
         ASTNode node = ret();
-        consume(SEMIC);
+        consume(SEMICOLON);
         return node;
     }
 
     else if(speculate(&Parser::expression)){
         ASTNode node = expression();
-        consume(SEMIC);
+        consume(SEMICOLON);
         return node;
     }
 

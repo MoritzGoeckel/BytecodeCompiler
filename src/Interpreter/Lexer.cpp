@@ -52,7 +52,7 @@ class Lexer{
         if(matches("while")) { consume("while"); return Token(BRANCH, "while"); }
         
         if(getChar() == ',') { consume(); return Token(COMMA, ","); } 
-        if(getChar() == ';') { consume(); return Token(SEMIC, ";"); }
+        if(getChar() == ';') { consume(); return Token(SEMICOLON, ";"); }
               
         if(isdigit(getChar()))
             return Token(NUMLIT, consumeAlphanumWord());
