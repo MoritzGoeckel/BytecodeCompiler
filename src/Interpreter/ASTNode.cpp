@@ -4,6 +4,11 @@
 #include <iostream>
 #include "Token.cpp"
 
+static void printSpace(int num){
+    for(int i = 0; i < num; i++)
+        std::cout << " ";
+}
+
 class ASTNode{
 
     private:
@@ -11,10 +16,31 @@ class ASTNode{
     std::vector<ASTNode> children;
     Token token;
 
+    void print(int indent) const{
+        printSpace(indent);
+        token.print();
+        std::cout << std::endl;
+
+        if(children.size() != 0){
+            printSpace(indent);
+            std::cout << "{" << std::endl;
+            
+            for(auto const& t: children)
+                t.print(indent + 5);
+            
+            printSpace(indent);            
+            std::cout << "}" << std::endl;
+        }
+    }
+
     public:
 
     ASTNode(Token token){
         this->token = token;
+    }
+
+    const Token& getToken() const{
+        return token;
     }
 
     void addChild(Token token){
@@ -26,12 +52,6 @@ class ASTNode{
     }
 
     void print() const{
-        token.print();
-        if(children.size() != 0){
-            std::cout << "{ ";
-            for(auto const& t: children)
-                t.print();
-            std::cout << " }";
-        }
+        print(0);
     }
 };

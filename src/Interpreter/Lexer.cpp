@@ -38,20 +38,20 @@ class Lexer{
         if(getChar() == '/') { consume(); return Token(INFOP, "/"); }
         if(getChar() == '*') { consume(); return Token(INFOP, "*"); }
     
+        if(getChar() == '=') { consume(); return Token(INFOP, "="); }
+
+        if(matches("==")) { consume("=="); return Token(INFOP, "=="); }
+        if(matches("!=")) { consume("!="); return Token(INFOP, "!="); }
+        if(getChar() == '>') { consume(); return Token(INFOP, ">"); }
+        if(getChar() == '<') { consume(); return Token(INFOP, "<"); }
+
         if(matches("return")) { consume("return"); return Token(RETURN, "return"); }
         if(matches("if")) { consume("if"); return Token(BRANCH, "if"); }
         if(matches("while")) { consume("while"); return Token(BRANCH, "while"); }
         
         if(getChar() == ',') { consume(); return Token(COMMA, ","); } 
         if(getChar() == ';') { consume(); return Token(SEMIC, ";"); }
-
-        if(matches("==")) { consume("=="); return Token(COMP, "=="); }
-        if(matches("!=")) { consume("!="); return Token(COMP, "!="); }
-        if(getChar() == '>') { consume(); return Token(COMP, ">"); }
-        if(getChar() == '<') { consume(); return Token(COMP, "<"); }
-        
-        if(getChar() == '=') { consume(); return Token(ASSIGN, "="); }
-      
+              
         if(isdigit(getChar()))
             return Token(NUMLIT, consumeAlphanumWord());
 

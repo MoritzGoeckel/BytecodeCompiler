@@ -63,7 +63,6 @@ class Parser{
     ASTNode statement();
     ASTNode expression();
 
-    ASTNode assignment();
     ASTNode branch();
     ASTNode ret();
     ASTNode infixOperation();
@@ -103,14 +102,8 @@ ASTNode Parser::statement(){
         return node;
     }
 
-    else if(speculate(&Parser::call)){
-        ASTNode node = call();
-        consume(SEMIC);
-        return node;
-    }
-
-    else if(speculate(&Parser::assignment)){
-        ASTNode node = assignment();
+    else if(speculate(&Parser::expression)){
+        ASTNode node = expression();
         consume(SEMIC);
         return node;
     }
@@ -131,9 +124,6 @@ ASTNode Parser::block(){
 }
 
 ASTNode Parser::expression(){
-
-    if(speculate(&Parser::assignment))
-        return assignment();
     
     if(speculate(&Parser::functionDefinition))
         return functionDefinition();
@@ -141,7 +131,7 @@ ASTNode Parser::expression(){
     if(speculate(&Parser::call))
         return call();
 
-    //TODO: This is one is dangerous for infinite recursion
+    //This is one is dangerous for infinite recursion
     if(speculate(&Parser::infixOperation))
         return infixOperation();
 
@@ -152,18 +142,6 @@ ASTNode Parser::expression(){
         return ASTNode(consume(IDENT));
 
     throw ParsingException("assignment, infix operation, function definition, call, identifier", typeToString(getToken().getType()), BT);
-}
-
-ASTNode Parser::assignment(){
-    ASTNode leftSide = ASTNode(consume(IDENT));
-    Token assignToken = consume(ASSIGN);
-    ASTNode rightSide = expression();
-
-    ASTNode node(assignToken);
-    node.addChild(leftSide);
-    node.addChild(rightSide);
-
-    return node;
 }
 
 ASTNode Parser::branch(){
@@ -182,9 +160,17 @@ ASTNode Parser::ret(){
 }
 
 ASTNode Parser::infixOperation(){
+
+    //TODO: Maybe use custom algorithm here
+    //Stack based with precedence and until semicolon
+
     ASTNode left = operand();
     Token op = consume(INFOP);
     ASTNode right = expression();
+
+    //If its an assignment left should be an identification
+    if(op.getText() == "=" && left.getToken().getType() != IDENT)
+        throw ParsingException("IDENT", typeToString(left.getToken().getType()), BT);    
 
     ASTNode node(op);
     node.addChild(left);

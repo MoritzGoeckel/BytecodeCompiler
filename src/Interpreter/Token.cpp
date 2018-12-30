@@ -15,7 +15,6 @@ std::string typeToString(int type){
     types.push_back("COMMA");
     types.push_back("SEMIC");
     types.push_back("COMP");
-    types.push_back("ASSIGN");
     types.push_back("IDENT");
     types.push_back("BRANCH");
     types.push_back("NUMLIT");
@@ -28,8 +27,8 @@ std::string typeToString(int type){
     return types[type];
 }
 
-int OCBR = 0;
-int CCBR = 1;
+const int OCBR = 0;
+const int CCBR = 1;
 const int OBR = 2;
 const int CBR = 3;
 const int INFOP = 4;
@@ -37,15 +36,14 @@ const int RETURN = 5;
 const int COMMA = 6;
 const int SEMIC = 7;
 const int COMP = 8;
-const int ASSIGN = 9;
-const int IDENT = 10;
-const int BRANCH = 11;
-const int NUMLIT = 12;
-const int BLOCK = 13;
-const int IDENTLIST = 14;
-const int FUNDEF = 15;
-const int EXPRESSIONLIST = 16;
-const int CALL = 17;
+const int IDENT = 9;
+const int BRANCH = 10;
+const int NUMLIT = 11;
+const int BLOCK = 12;
+const int IDENTLIST = 13;
+const int FUNDEF = 14;
+const int EXPRESSIONLIST = 15;
+const int CALL = 16;
 
 class Token{
     
