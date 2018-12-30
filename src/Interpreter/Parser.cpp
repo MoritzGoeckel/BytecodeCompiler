@@ -35,7 +35,6 @@ class Parser{
     }
 
     const Token& consume(){
-        //std::cout << "Consume index " << std::to_string(index) << " " << typeToString(getToken().getType()) << std::endl;
         return tokens[index++];
     }
 
@@ -49,13 +48,11 @@ class Parser{
     }
 
     void mark(){
-        //std::cout << "Mark index " << std::to_string(index)  << " " << typeToString(getToken().getType()) << std::endl;
         markers.push_back(this->index); 
     }
 
     void reset(){
         this->index = markers.back();
-        //std::cout << "Reset to " << std::to_string(index) << " " << typeToString(getToken().getType()) << std::endl;
         markers.pop_back();
     }
 
@@ -131,7 +128,6 @@ ASTNode Parser::expression(){
     if(speculate(&Parser::call))
         return call();
 
-    //This is one is dangerous for infinite recursion
     if(speculate(&Parser::infixOperation))
         return infixOperation();
 
@@ -198,10 +194,11 @@ ASTNode Parser::infixOperation(){
     if(stack.size() < 3 || stack.size() % 2 == 0)
         throw ParsingException("BAD STACK SIZE", "", BT);
 
+    //Reducing stack until only one element is left
     while(stack.size() > 1){
+        //Iterating over the operators
         for(int i = 1; i < stack.size(); i += 2){
             if(i + 2 >= stack.size() || stack[i].getToken().getPrecedence() <= stack[i + 2].getToken().getPrecedence()){
-                //Reduce
                 ASTNode node = stack[i];
                 node.addChild(stack[i - 1]);
                 node.addChild(stack[i + 1]);

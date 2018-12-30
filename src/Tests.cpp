@@ -45,6 +45,8 @@ TEST(Lexxer, LexerTest) {
   
   while(!l.eof())
     l.getNextToken().print();
+
+  std::cout << std::endl;
 }
 
 TEST(Paarser, ParserTest) {
