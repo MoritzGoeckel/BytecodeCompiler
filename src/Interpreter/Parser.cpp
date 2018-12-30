@@ -159,10 +159,9 @@ ASTNode Parser::ret(){
     return node;
 }
 
+//Uses custom algorithm for operator precedence
 ASTNode Parser::infixOperation(){
 
-    //TODO: Maybe use custom algorithm here
-    //Stack based with precedence and until semicolon
     bool withinBrackets = false;
     if(getToken().getType() == OBR){
         consume(OBR);
