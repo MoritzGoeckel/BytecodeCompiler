@@ -35,6 +35,8 @@ class Lexer{
 
         if(getChar() == '+') { consume(); return Token(INFOP, "+"); }
         if(getChar() == '-') { consume(); return Token(INFOP, "-"); }
+        if(matches("&&")) { consume("&&"); return Token(INFOP, "&&"); }
+        if(matches("||")) { consume("||"); return Token(INFOP, "||"); }
         if(getChar() == '/') { consume(); return Token(INFOP, "/"); }
         if(getChar() == '*') { consume(); return Token(INFOP, "*"); }
     

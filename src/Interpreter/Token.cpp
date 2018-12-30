@@ -80,11 +80,14 @@ class Token{
         if(getText() == "*" || getText() == "/")
             return 5;
 
-        if(getText() == "+" || getText() == "-")
+        if(getText() == "+" || getText() == "-" || getText() == "&&" || getText() == "||")
             return 6;
 
-        if(getText() == "=")
+        if(getText() == "==" || getText() == "!=" || getText() == "<" || getText() == ">")
             return 7;
+
+        if(getText() == "=")
+            return 8;
 
         throw std::runtime_error("Precedence not defined for: " + getText() + BT);
     }
