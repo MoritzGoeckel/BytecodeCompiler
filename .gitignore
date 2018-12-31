@@ -11,3 +11,5 @@ CMakeCache.txt
 *.swp
 
 tags
+
+parserOutput.txt
