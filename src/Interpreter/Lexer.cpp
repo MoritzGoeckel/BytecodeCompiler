@@ -50,6 +50,8 @@ class Lexer{
         if(matches("return")) { consume("return"); return Token(RETURN, "return"); }
         if(matches("if")) { consume("if"); return Token(BRANCH, "if"); }
         if(matches("while")) { consume("while"); return Token(BRANCH, "while"); }
+
+        if(matches("let")) { consume("let"); return Token(LET, ""); }
         
         if(getChar() == ',') { consume(); return Token(COMMA, ","); } 
         if(getChar() == ';') { consume(); return Token(SEMICOLON, ";"); }

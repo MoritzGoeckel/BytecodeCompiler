@@ -36,7 +36,8 @@ std::vector<std::string> types = {
     "FUNDEF",
     "EXPRLIST",
     "CALL",
-    "UNINITIALIZED"
+    "UNINITIALIZED",
+    "LET"
 };
 
 std::string typeToString(int type){
@@ -60,3 +61,4 @@ const int FUNDEF = 13;
 const int EXPRESSIONLIST = 14;
 const int CALL = 15;
 const int UNINITIALIZED = 16;
+const int LET = 17;

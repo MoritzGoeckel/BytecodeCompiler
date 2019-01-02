@@ -60,6 +60,8 @@ class Parser{
     ASTNode statement();
     ASTNode expression();
 
+    ASTNode let();
+
     ASTNode branch();
     ASTNode ret();
     ASTNode infixOperation();
@@ -104,6 +106,9 @@ ASTNode Parser::statement(){
         consume(SEMICOLON);
         return node;
     }
+
+    else if(speculate(&Parser::let))
+        return let();
 
     else
         throw ParsingException("block, assignment, branch, return", typeToString(getToken().getType()), BT);
@@ -151,6 +156,13 @@ ASTNode Parser::branch(){
 ASTNode Parser::ret(){
     ASTNode node(ASTNode(consume(RETURN)));
     node.addChild(expression());
+
+    return node;
+}
+
+ASTNode Parser::let(){
+    ASTNode node(ASTNode(consume(LET)));
+    node.addChild(consume(IDENT));
 
     return node;
 }
@@ -217,19 +229,23 @@ ASTNode Parser::infixOperation(){
 
 ASTNode Parser::operand(){
 
-    if(speculate(&Parser::functionDefinition))
+    if(speculate(&Parser::let))
+        return let();
+
+    else if(speculate(&Parser::functionDefinition))
         return functionDefinition();
 
-    if(speculate(&Parser::call))
+    else if(speculate(&Parser::call))
         return call();
 
-    if(getToken().getType() == NUMLIT)
+    else if(getToken().getType() == NUMLIT)
         return ASTNode(consume(NUMLIT));
 
-    if(getToken().getType() == IDENT)
+    else if(getToken().getType() == IDENT)
         return ASTNode(consume(IDENT));
 
-    throw ParsingException("NUMLITERAL, IDENTIFIER, CALL", typeToString(getToken().getType()), BT);    
+    else 
+        throw ParsingException("NUMLITERAL, IDENTIFIER, CALL", typeToString(getToken().getType()), BT);    
 }
 
 ASTNode Parser::functionDefinition(){
