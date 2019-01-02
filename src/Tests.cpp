@@ -31,11 +31,13 @@ TEST(Writer, WriteFileTest) {
 
 TEST(Compiler, ReadAndCompile) {
   assembleFile("testfile.ma", "testfile.bc");
+  std::cout << "Done assembling" << std::endl;
 }
 
 TEST(MVM, ReadAndExecute) {
   ByteCode code;
   code.read("testfile.bc");
+  std::cout << "Done reading" << std::endl;
   execute(code);
   std::cout << "Done executing" << std::endl;
 }
@@ -58,7 +60,7 @@ TEST(Paarser, ParserTest) {
 
   Parser p(tokens);
   ASTNode n = p.parse();
-  n.print();
+  //n.print();
 
   std::cout << "Done executing" << std::endl;
 }

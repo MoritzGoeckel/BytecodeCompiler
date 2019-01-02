@@ -213,14 +213,14 @@ class OptCodeEngine{
 
         //PUSH    REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            throw std::runtime_error("Not implemented" + BT); //TODO: Not implemented
+            memory.pushParameter(memory.getRegister(statementPtr[0]));
             nextStatementIndex += 2;  
         });
         humanReadableCodes["PUSH"] = optCode++;
 
         //POP     REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            throw std::runtime_error("Not implemented" + BT); //TODO: Not implemented
+            memory.setRegister(statementPtr[0], memory.popParameter());
             nextStatementIndex += 2;
         });
         humanReadableCodes["POP"] = optCode++;
@@ -235,11 +235,22 @@ class OptCodeEngine{
         });
         humanReadableCodes["INCR"] = optCode++;
 
-        //LABEL   L
-        //humanReadableCodes["LABEL"] = optCode++;
+        //CALL L //Thats pushing frame with parameters, setting return address
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            memory.pushFrame(nextStatementIndex + 2);
+            nextStatementIndex = statementPtr[0];
+        });
+        humanReadableCodes["CALL"] = optCode++;
 
+        //RETURN //Thats setting the return values and poping frame
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            nextStatementIndex = memory.popFrame();
+        });
+        humanReadableCodes["RETURN"] = optCode++;
+
+        //Theses do not have commands:
+        //LABEL   L
         //; COMMENT
-        //humanReadableCodes[";"] = optCode++;
 
         for (auto& t : humanReadableCodes)
             optToReadable[t.second] = t.first;

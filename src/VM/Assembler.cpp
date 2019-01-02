@@ -73,7 +73,7 @@ void assembleFile(std::string inPath, std::string outPath){
             continue;
 
         //JMP
-        if(tokens[0] == "JMP" || tokens[0] == "JMPC"){
+        if(tokens[0] == "JMP" || tokens[0] == "JMPC" || tokens[0] == "CALL" ){
             if(labels.find(tokens[1]) == labels.end())
                 throw std::runtime_error("Unknown label" + BT);
 
