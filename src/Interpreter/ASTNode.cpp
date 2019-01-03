@@ -12,7 +12,6 @@ static void printSpace(int num){
 class ASTNode{
 
     private:
-    
     std::vector<ASTNode> children;
     Token token;
 
@@ -43,6 +42,10 @@ class ASTNode{
         return token;
     }
 
+    const int getTokenType() const{
+        return token.getType();
+    }
+
     void addChild(Token token){
         children.push_back(ASTNode(token));
     }
@@ -53,5 +56,13 @@ class ASTNode{
 
     void print() const{
         print(0);
+    }
+
+    const int getChildCount() const{
+        return children.size();
+    }
+
+    const ASTNode& getChild(int index) const{
+        return children[index];
     }
 };

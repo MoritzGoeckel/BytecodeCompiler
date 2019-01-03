@@ -14,6 +14,8 @@
 #include "Interpreter/Lexer.cpp"
 #include "Interpreter/Parser.cpp"
 
+#include "Interpreter/Compiler.cpp"
+
 #include "gtest/gtest.h"
 
 TEST(Writer, WriteFileTest) {
@@ -38,7 +40,7 @@ TEST(MVM, ReadAndExecute) {
   ByteCode code;
   code.read("testfile.bc");
   std::cout << "Done reading" << std::endl;
-  execute(code);
+  //execute(code); //TODO: Enable again
   std::cout << "Done executing" << std::endl;
 }
 
@@ -60,9 +62,26 @@ TEST(Paarser, ParserTest) {
 
   Parser p(tokens);
   ASTNode n = p.parse();
-  //n.print();
+  //n.print(); //TODO: Enable again?
 
   std::cout << "Done executing" << std::endl;
+}
+
+TEST(Compiler, CompilerTest) {
+  Lexer l("samplecode.m");
+  
+  std::vector<Token> tokens;
+  while(!l.eof())
+    tokens.push_back(l.getNextToken());
+
+  Parser p(tokens);
+  ASTNode n = p.parse();
+  
+  Compiler c;
+
+  std::cout << c.compile(n) << std::endl;
+
+  std::cout << "Done compiling" << std::endl;
 }
 
 int main(int argc, char **argv) {
