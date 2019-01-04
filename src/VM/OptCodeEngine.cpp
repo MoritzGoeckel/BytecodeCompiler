@@ -248,6 +248,16 @@ class OptCodeEngine{
         });
         humanReadableCodes["RETURN"] = optCode++;
 
+        //COPY     REG REG
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            memory.setRegister(
+                statementPtr[1], 
+                memory.getRegister(statementPtr[0])
+            );
+            nextStatementIndex += 3;
+        });
+        humanReadableCodes["COPY"] = optCode++;
+
         //Theses do not have commands:
         //LABEL   L
         //; COMMENT

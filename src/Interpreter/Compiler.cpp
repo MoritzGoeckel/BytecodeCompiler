@@ -18,6 +18,8 @@ class Compiler{
     std::string block(const ASTNode& node);
     std::string numlit(const ASTNode& node, std::string varname);
     std::string infop(const ASTNode& node, std::string varname);
+    std::string call(const ASTNode& node, std::string varname);
+    std::string expression(const ASTNode& node, std::string varname);
 
     public:
     Compiler(){
@@ -105,17 +107,44 @@ std::string Compiler::infop(const ASTNode& node, std::string varname){
     throw std::runtime_error("Unexpected text: " + node.getToken().getText() + BT);
 }
 
-std::string Compiler::emit(const ASTNode& node){
-    //std::cout << "COMP" << std::endl;
-    return emit(node, "NONE");
-}
+std::string Compiler::call(const ASTNode& node, std::string varname){
+    std::string ident = node.getChild(0).getToken().getText();
 
-std::string Compiler::emit(const ASTNode& node, std::string varname){
-    //std::cout << "COMP varname" << std::endl;
-    if(node.getTokenType() == BLOCK){
-        return block(node);
+    //Evaluate parameter expressions and pushing for later use
+    const ASTNode& exprlist = node.getChild(1);
+    const std::string tmpVar = rs.borrow();
+    int parameterCount = exprlist.getChildCount();
+    std::string code = "";
+    //Evaluating the last parameter first to maintain order
+    //  while using the stack
+    for(int i = parameterCount - 1; i >= 0; i--){
+        code += expression(exprlist.getChild(i), tmpVar);
+        code += "PUSH %" + tmpVar + endl;
+    }
+    rs.giveBack(tmpVar);
+
+    //Actual function call
+
+    if(ident == "print"){
+        const std::string tmpVar = rs.borrow();
+        for(int i = 0; i < parameterCount; i++){
+            code += "POP %" + tmpVar + endl;
+            code += "OUT %" + tmpVar + endl;
+        }
+        rs.giveBack(tmpVar);
+
+        return code;
     }
 
+    //And here the actual functions
+
+    //POP %varname
+    //Pop after call to varname
+
+    throw std::runtime_error("Not implemented " + node.getToken().getText() + BT);
+}
+
+std::string Compiler::expression(const ASTNode& node, std::string varname){
     if(node.getTokenType() == INFOP){
         return infop(node, varname);
     }
@@ -125,7 +154,31 @@ std::string Compiler::emit(const ASTNode& node, std::string varname){
     }
 
     if(node.getTokenType() == CALL){
-        //return numlit(node, varname);
+        return call(node, varname);
+    }
+
+    if(node.getTokenType() == IDENT){
+        return "COPY %" + node.getToken().getText() + " %" + varname + endl;
+    }
+
+    throw std::runtime_error("Unexpected node: " + node.getToken().getText() + BT);
+}
+
+std::string Compiler::emit(const ASTNode& node){
+    //std::cout << "COMP" << std::endl;
+    return emit(node, "NONE");
+}
+
+std::string Compiler::emit(const ASTNode& node, std::string varname){
+    //std::cout << "COMP varname" << std::endl;
+    int type = node.getTokenType();
+
+    if(type == BLOCK){
+        return block(node);
+    }
+
+    if(type == INFOP || type == NUMLIT || type == CALL || type == IDENT){
+        return expression(node, varname);
     }
 
     throw std::runtime_error("Unexpected node: " + node.getToken().getText() + BT);
