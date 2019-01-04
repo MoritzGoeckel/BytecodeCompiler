@@ -158,6 +158,7 @@ std::string Compiler::expression(const ASTNode& node, std::string varname){
     }
 
     if(node.getTokenType() == IDENT){
+        //Todo: This is not the most efficient way
         return "COPY %" + node.getToken().getText() + " %" + varname + endl;
     }
 
