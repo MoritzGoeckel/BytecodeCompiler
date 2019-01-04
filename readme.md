@@ -3,6 +3,7 @@
 This is a implementation of a bytecode compiler and a virtual machine for execution. Even though there are many parser generators out there everything in here is full hand crafted for educational purpose.
 
 ## Features
+
 * Tokenizing code
 * Generating AST from a stream of tokens
 * Compiling AST to low level IR
@@ -10,7 +11,6 @@ This is a implementation of a bytecode compiler and a virtual machine for execut
 * Executing bytecode in a virtual machine
 
 ## Example code
-
 ```
 {
     {
@@ -53,44 +53,42 @@ END
 ```
 
 ## Example AST
+```
 BLOCK(''){
-     INFOP('=')
-     {
-          IDENT('c')
-          NUMLIT('2')
-     }
-     CALL('')
-     {
-          IDENT('print')
-          EXPRLIST('')
-          {
-               INFOP('+')
-               {
-                    NUMLIT('1')
-                    NUMLIT('3')
-               }
-               NUMLIT('2')
-          }
-     }
-     INFOP('=')
-     {
-          IDENT('c')
-          INFOP('+')
-          {
-               IDENT('c')
-               NUMLIT('3')
-          }
-     }
+    INFOP('=')
+    {
+        IDENT('c')
+        NUMLIT('2')
+    }
+    CALL('')
+    {
+        IDENT('print')
+        EXPRLIST('')
+        {
+            INFOP('+')
+            {
+                NUMLIT('1')
+                NUMLIT('3')
+            }
+            NUMLIT('2')
+        }
+    }
+    INFOP('=')
+    {
+        IDENT('c')
+        INFOP('+')
+        {
+            IDENT('c')
+            NUMLIT('3')
+        }
+    }
 }
+```
 
 ## Example token stream
 
 ```
-OCBR('{') IDENT('c') INFOP('=') NUMLIT('2') SEMICO
-LON(';') IDENT('print') OBR('(') NUMLIT('1') INFOP
-('+') NUMLIT('3') COMMA(',') NUMLIT('2') CBR(')')
-SEMICOLON(';') IDENT('c') INFOP('=') IDENT('c') IN
-FOP('+') NUMLIT('3') SEMICOLON(';') CCBR('}')
+OCBR('{') IDENT('c') INFOP('=') NUMLIT('2') SEMICOLON(';') IDENT('print') OBR('(') NUMLIT('1') INFOP('+') NUMLIT('3') COMMA(',') NUMLIT('2') CBR(')') SEMICOLON(';') IDENT('c') INFOP('=') IDENT('c') INFOP('+') NUMLIT('3') SEMICOLON(';') CCBR('}')
 ```
 
 ## Getting started
