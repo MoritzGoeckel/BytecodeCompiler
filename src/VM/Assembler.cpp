@@ -2,17 +2,18 @@
 
 #include <vector>
 #include <string>
-#include <fstream>
 
 #include <iostream>
-
 #include <sstream>
+#include <fstream>
 
 #include "Types.cpp"
 #include "../ErrorHandling.cpp"
 
 #include "OptCodeEngine.cpp"
 #include "ByteCode.cpp"
+
+#include<bits/stdc++.h>
 
 static void split(const std::string& str, std::vector<std::string>& cont, char delim = ' ')
 {
@@ -24,9 +25,23 @@ static void split(const std::string& str, std::vector<std::string>& cont, char d
     }
 }
 
-void assembleFile(std::string inPath, std::string outPath){
-    std::ifstream inFile(inPath);
+static ByteCode assembleStream(std::stringstream& ss);
 
+ByteCode assembleString(std::string str){
+    std::stringstream ss(str);
+    return assembleStream(ss);
+}
+
+ByteCode assembleFile(std::string inPath){
+    std::ifstream file(inPath);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    file.close();
+
+    return assembleStream(buffer);
+}
+
+static ByteCode assembleStream(std::stringstream& ss){
     OptCodeEngine opts;
     ByteCode code;
 
@@ -36,8 +51,11 @@ void assembleFile(std::string inPath, std::string outPath){
     int8 nextVariableId = 0;
     std::map<std::string, int8> variables;
 
-    for(std::string line; getline(inFile, line);)
+    for(std::string line; getline(ss, line);)
         lines.push_back(line);
+
+    /*for(std::string& s : lines)
+        std::cout << "LINE: " << s << std::endl;*/
 
     //Detect, index and remove labels
     int codeIndex = 0;
@@ -68,6 +86,12 @@ void assembleFile(std::string inPath, std::string outPath){
         std::vector<std::string> tokens;
         split(line, tokens, ' ');
 
+        /*tokens.erase(std::remove_if(
+            tokens.begin(), 
+            tokens.end(),
+            [](std::string s){return s.size() <= 1 && !isdigit(s[0]);}
+        ), tokens.end());*/
+
         //Comment
         if(tokens[0] == ";")
             continue;
@@ -89,15 +113,20 @@ void assembleFile(std::string inPath, std::string outPath){
         code.add(opts.encodeOptString(tokens[0]));
         for(int i = 1; i < tokens.size(); i++){
             if(tokens[i].front() == '%'){
+                //std::cout << "'" << tokens[i] << "'" << std::endl;
+
                 //Its a variable
                 std::string name = tokens[i];
                 int8 id;
                 if(variables.find(name) == variables.end()){
                     //Its a new one
                     variables[name] = nextVariableId++;
+                    //std::cout << "New var: " << name << " mapping to " << std::to_string(variables[name]) << std::endl;
                     //std::cout << "new! " << name << " " << std::to_string(variables[name]) << std::endl; 
                 }
                 code.add(variables[name]);
+                //std::cout << "Var: " << name << " mapping to " << std::to_string(variables[name]) << std::endl;
+                
                 //std::cout << name << " " << std::to_string(variables[name]) << std::endl; 
             }
             else{
@@ -107,5 +136,5 @@ void assembleFile(std::string inPath, std::string outPath){
         }
     }
 
-    code.write(outPath);
+    return code;
 }

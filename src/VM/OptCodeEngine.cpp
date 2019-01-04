@@ -25,6 +25,10 @@ class OptCodeEngine{
 
         //LOAD    L   REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            /*std::cout << "Loading " << std::to_string(statementPtr[0]) 
+                    << " to " << std::to_string(statementPtr[1])
+                    << std::endl;*/
+            
             memory.setRegister(statementPtr[1], statementPtr[0]);
             nextStatementIndex += 3;
         });
@@ -46,8 +50,14 @@ class OptCodeEngine{
 
         //ADD     REG REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            /*std::cout << "Adding " << std::to_string(memory.getRegister(statementPtr[0])) 
+                      << "( " << std::to_string(statementPtr[0]) << " )"
+                      << " to " << std::to_string(memory.getRegister(statementPtr[1])) 
+                      << "( " << std::to_string(statementPtr[1]) << " )"
+                      << std::endl;*/
+
             memory.setRegister(
-                statementPtr[0], 
+                statementPtr[2], 
                 memory.getRegister(statementPtr[0]) + memory.getRegister(statementPtr[1])
             );
             nextStatementIndex += 4;
@@ -57,7 +67,7 @@ class OptCodeEngine{
         //SUB     REG REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
-                statementPtr[0], 
+                statementPtr[2], 
                 memory.getRegister(statementPtr[0]) - memory.getRegister(statementPtr[1])
             );
             nextStatementIndex += 4;
@@ -67,7 +77,7 @@ class OptCodeEngine{
         //MUL     REG REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
-                statementPtr[0], 
+                statementPtr[2], 
                 memory.getRegister(statementPtr[0]) * memory.getRegister(statementPtr[1])
             );
             nextStatementIndex += 4;
@@ -77,7 +87,7 @@ class OptCodeEngine{
         //DIV     REG REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
-                statementPtr[0], 
+                statementPtr[2], 
                 memory.getRegister(statementPtr[0]) / memory.getRegister(statementPtr[1])
             );
             nextStatementIndex += 4;

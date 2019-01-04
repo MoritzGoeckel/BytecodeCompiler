@@ -56,11 +56,13 @@ class Memory{
     }
 
     void pushParameter(int param){
+        //std::cout << "Pushing " << std::to_string(param) << std::endl;
         parameters.push_back(param);
     }
 
     int popParameter(){
         int ret = parameters.back();
+        //std::cout << "Poping " << std::to_string(ret) << std::endl;
         parameters.pop_back();
         return ret;
     }

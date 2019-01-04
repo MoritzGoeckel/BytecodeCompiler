@@ -32,7 +32,8 @@ TEST(Writer, WriteFileTest) {
 }
 
 TEST(Compiler, ReadAndCompile) {
-  assembleFile("testfile.ma", "testfile.bc");
+  ByteCode code = assembleFile("testfile.ma");
+  code.write("testfile.bc");
   std::cout << "Done assembling" << std::endl;
 }
 
@@ -40,7 +41,7 @@ TEST(MVM, ReadAndExecute) {
   ByteCode code;
   code.read("testfile.bc");
   std::cout << "Done reading" << std::endl;
-  //execute(code); //TODO: Enable again
+  execute(code); //TODO: Enable again
   std::cout << "Done executing" << std::endl;
 }
 
@@ -83,6 +84,36 @@ TEST(Compiler, CompilerTest) {
 
   std::cout << "Done compiling" << std::endl;
 }
+
+TEST(Integration, IntegrationTest) {
+  Lexer l("samplecode.m");
+  
+  std::vector<Token> tokens;
+  while(!l.eof())
+    tokens.push_back(l.getNextToken());
+
+  for(Token& t : tokens)
+    t.print();
+  std::cout << std::endl;
+  std::cout << ">> Done tokenizing" << std::endl;
+
+  Parser p(tokens);
+  ASTNode n = p.parse();
+  n.print();
+  std::cout << ">> Done parsing" << std::endl;
+
+  Compiler c;
+  std::string compiled = c.compile(n);
+  std::cout << compiled << std::endl;
+  std::cout << ">> Done compiling" << std::endl;
+  
+  ByteCode code = assembleString(compiled);
+  std::cout << ">> Done assembling" << std::endl;
+
+  execute(code);
+  std::cout << ">> Done executing" << std::endl;
+}
+
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

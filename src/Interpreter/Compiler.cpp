@@ -23,7 +23,7 @@ class Compiler{
 
     public:
     Compiler(){
-        endl = "\r\n";
+        endl = "\n"; //TODO: Should be system unspecific
         rs = RegisterManager();
     }
 
