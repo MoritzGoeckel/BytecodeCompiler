@@ -20,6 +20,8 @@ class Compiler{
     std::string infop(const ASTNode& node, std::string varname);
     std::string call(const ASTNode& node, std::string varname);
     std::string expression(const ASTNode& node, std::string varname);
+    std::string Compiler::funDef(const ASTNode& node, std::string varname);
+
 
     public:
     Compiler(){
@@ -107,6 +109,21 @@ std::string Compiler::infop(const ASTNode& node, std::string varname){
     throw std::runtime_error("Unexpected text: " + node.getToken().getText() + BT);
 }
 
+std::string Compiler::funDef(const ASTNode& node, std::string varname){
+    //Todo: Write to functionlist with unique name, put the reference into varname
+    
+    //Function:
+
+    //RETURN
+    //POP %b
+    //POP %a
+    //For all in identlist
+
+    //Assign to variable (Should have a specific type?)
+
+    //LOAD UniqueLabel %varname
+}
+
 std::string Compiler::call(const ASTNode& node, std::string varname){
     std::string ident = node.getChild(0).getToken().getText();
 
@@ -136,6 +153,11 @@ std::string Compiler::call(const ASTNode& node, std::string varname){
         return code;
     }
 
+    else {
+        //Todo: Call to content of ident
+        //CALLV WEN????
+    }
+
     //And here the actual functions
 
     //POP %varname
@@ -155,6 +177,10 @@ std::string Compiler::expression(const ASTNode& node, std::string varname){
 
     if(node.getTokenType() == CALL){
         return call(node, varname);
+    }
+
+    if(node.getTokenType() == FUNDEF){
+        return funDef(node, varname);
     }
 
     if(node.getTokenType() == IDENT){

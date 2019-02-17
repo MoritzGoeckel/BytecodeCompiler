@@ -1,11 +1,11 @@
-# Bytecode Interpreter
+# Bytecode Compiler and VM
 
 This is a implementation of a bytecode compiler and a virtual machine for execution. Even though there are many parser generators out there everything in here is full hand crafted for educational purpose.
 
-## Features
+## Pipeline
 
-* Tokenizing code
-* Generating AST from a stream of tokens
+* Tokenizing
+* Generating AST (Recursive descent parser with backtracking)
 * Compiling AST to low level IR
 * Assembling low level IR to bytecode
 * Executing bytecode in a virtual machine

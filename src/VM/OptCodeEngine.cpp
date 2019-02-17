@@ -252,6 +252,13 @@ class OptCodeEngine{
         });
         humanReadableCodes["CALL"] = optCode++;
 
+        //CALLV REG //Thats pushing frame with parameters, setting return address
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
+            memory.pushFrame(nextStatementIndex + 2);
+            nextStatementIndex = memory.getRegister(statementPtr[0]);
+        });
+        humanReadableCodes["CALLV"] = optCode++;
+
         //RETURN //Thats setting the return values and poping frame
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             nextStatementIndex = memory.popFrame();
