@@ -134,10 +134,17 @@ TEST(Transformer, FlattenFunctionsTest) {
   std::cout << ">> Done parsing" << std::endl;
 
   std::vector<ASTNode> fns;
-  //flattenFunctions(n, fns);
+  createMain(n);
+  flattenFunctions(n, fns);
   std::cout << ">> Done flattening" << std::endl;
 
   n.print();
+
+  std::cout << ">> Functions" << std::endl;
+
+  for(auto f : fns){
+    f.print();
+  }
 
   /*Compiler c;
   std::string compiled = c.compile(n);

@@ -26,4 +26,12 @@
     
     main();
 
+    let getCounter = (init){
+        let c = init;
+        return (){
+            c = c + step;
+            return c;
+        };
+    };
+
 }
