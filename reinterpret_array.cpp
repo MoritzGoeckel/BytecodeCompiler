@@ -12,23 +12,17 @@ void print(t n){
 }
 
 int main() {
-    std::cout << sizeof(int8) * 8 << " " << sizeof(int16) * 8 << std::endl;
-    
-    int16 num = 9001;
+    int16 input = 9001;
     std::vector<int8> v;
     
-    std::cout << "-> " << num << std::endl;
+    int index = 0;
 
-    print<int16>(num);
-    std::cout << "first " << std::endl;
-    print<int8>((int8)num);
-    v.push_back((int8)num); 
-    
-    std::cout << "second " << std::endl;
-    print<int8>((int8)(num >> 8));
-    v.push_back((int8)(num >> 8));
+    //Writing
+    v.reserve(2);
+    *((int16*)(v.data() + index)) = input;
 
-    int16 numnum = *((int16*) &*(v.begin() + 0));
-    std::cout << "<- " << numnum << std::endl;
-    print<int16>(numnum);
+    //Reading
+    int16 output = *((int16*)(v.data() + index));
+
+    std::cout << output << std::endl;
 }

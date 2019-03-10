@@ -10,6 +10,8 @@ CMakeCache.txt
 *.bc
 *.swp
 
+*.out
+
 tags
 
 parserOutput.txt
