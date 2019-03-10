@@ -20,7 +20,7 @@ class Compiler{
     std::string infop(const ASTNode& node, std::string varname);
     std::string call(const ASTNode& node, std::string varname);
     std::string expression(const ASTNode& node, std::string varname);
-    std::string Compiler::funDef(const ASTNode& node, std::string varname);
+    std::string funDef(const ASTNode& node, std::string varname);
 
 
     public:
@@ -188,7 +188,7 @@ std::string Compiler::expression(const ASTNode& node, std::string varname){
         return "COPY %" + node.getToken().getText() + " %" + varname + endl;
     }
 
-    throw std::runtime_error("Unexpected node: " + node.getToken().getText() + BT);
+    throw std::runtime_error("Unexpected node: " + node.getToken().getPrintString() + BT);
 }
 
 std::string Compiler::emit(const ASTNode& node){
@@ -204,9 +204,9 @@ std::string Compiler::emit(const ASTNode& node, std::string varname){
         return block(node);
     }
 
-    if(type == INFOP || type == NUMLIT || type == CALL || type == IDENT){
+    if(type == INFOP || type == NUMLIT || type == CALL || type == IDENT || type == FUNDEF){
         return expression(node, varname);
     }
 
-    throw std::runtime_error("Unexpected node: " + node.getToken().getText() + BT);
+    throw std::runtime_error("Unexpected node: " + node.getToken().getPrintString() + BT);
 }

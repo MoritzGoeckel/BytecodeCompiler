@@ -16,9 +16,11 @@
 
 #include "Interpreter/Compiler.cpp"
 
+#include "Interpreter/Transformers/FunctionFlatter.cpp"
+
 #include "gtest/gtest.h"
 
-TEST(Writer, WriteFileTest) {
+ /*TEST(Writer, WriteFileTest) {
   std::vector<int8> outData = {15, 30};
   ByteCode outCode(outData);
   outCode.write("testfile_vec.bc");
@@ -52,9 +54,9 @@ TEST(Lexxer, LexerTest) {
     l.getNextToken().print();
 
   std::cout << std::endl;
-}
+}*/
 
-TEST(Paarser, ParserTest) {
+ /*TEST(Paarser, ParserTest) {
   Lexer l("samplecode.m");
   
   std::vector<Token> tokens;
@@ -66,9 +68,9 @@ TEST(Paarser, ParserTest) {
   //n.print(); //TODO: Enable again?
 
   std::cout << "Done executing" << std::endl;
-}
+}*/
 
-TEST(Compiler, CompilerTest) {
+/*TEST(Compiler, CompilerTest) {
   Lexer l("samplecode.m");
   
   std::vector<Token> tokens;
@@ -83,9 +85,9 @@ TEST(Compiler, CompilerTest) {
   std::cout << c.compile(n) << std::endl;
 
   std::cout << "Done compiling" << std::endl;
-}
+}*/
 
-TEST(Integration, IntegrationTest) {
+ /*TEST(Integration, IntegrationTest) {
   Lexer l("samplecode.m");
   
   std::vector<Token> tokens;
@@ -112,8 +114,42 @@ TEST(Integration, IntegrationTest) {
 
   execute(code);
   std::cout << ">> Done executing" << std::endl;
-}
+}*/
 
+TEST(Transformer, FlattenFunctionsTest) {
+  Lexer l("samplecodeFlattingFns.m");
+  
+  std::vector<Token> tokens;
+  while(!l.eof())
+    tokens.push_back(l.getNextToken());
+
+  for(Token& t : tokens)
+    t.print();
+  std::cout << std::endl;
+  std::cout << ">> Done tokenizing" << std::endl;
+
+  Parser p(tokens);
+  ASTNode n = p.parse();
+  n.print();
+  std::cout << ">> Done parsing" << std::endl;
+
+  std::vector<ASTNode> fns;
+  //flattenFunctions(n, fns);
+  std::cout << ">> Done flattening" << std::endl;
+
+  n.print();
+
+  /*Compiler c;
+  std::string compiled = c.compile(n);
+  std::cout << compiled << std::endl;
+  std::cout << ">> Done compiling" << std::endl;
+  
+  ByteCode code = assembleString(compiled);
+  std::cout << ">> Done assembling" << std::endl;
+
+  execute(code);
+  std::cout << ">> Done executing" << std::endl;*/
+}
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

@@ -1,7 +1,7 @@
 [
 {
   "directory": "/home/moritz/repos/MVM",
-  "command": "/usr/bin/c++    -g   -o CMakeFiles/runTests.dir/src/Tests.cpp.o -c /home/moritz/repos/MVM/src/Tests.cpp",
+  "command": "/usr/bin/c++    -Wall -Wextra -O3 -g -O3   -o CMakeFiles/runTests.dir/src/Tests.cpp.o -c /home/moritz/repos/MVM/src/Tests.cpp",
   "file": "/home/moritz/repos/MVM/src/Tests.cpp"
 }
 ]

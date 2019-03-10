@@ -30,8 +30,12 @@ class Token{
         return this->text;
     }
 
+    std::string getPrintString() const{
+        return typeToString(type) + "('" + text + "') ";
+    }
+
     void print() const{
-        std::cout << typeToString(type) << "('" << text << "') "; 
+        std::cout << this->getPrintString(); 
     }
 
     int getPrecedence() const{

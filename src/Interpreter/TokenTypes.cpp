@@ -37,10 +37,14 @@ std::vector<std::string> types = {
     "EXPRLIST",
     "CALL",
     "UNINITIALIZED",
-    "LET"
+    "LET",
+    "FNREF"
 };
 
 std::string typeToString(int type){
+    if(type >= types.size())
+        std::cout << "Index out of bounds: " << BT;
+    
     return types[type];
 }
 
@@ -62,3 +66,4 @@ const int EXPRESSIONLIST = 14;
 const int CALL = 15;
 const int UNINITIALIZED = 16;
 const int LET = 17;
+const int FNREF = 18;

@@ -65,4 +65,12 @@ class ASTNode{
     const ASTNode& getChild(int index) const{
         return children[index];
     }
+
+    ASTNode& getChildMutable(int index){
+        return children[index];
+    }
+
+    void setChild(int index, ASTNode& child){
+        children[index] = child;
+    }
 };

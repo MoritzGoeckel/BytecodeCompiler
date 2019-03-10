@@ -14,6 +14,10 @@ class ParsingException : public std::exception{
         std::cout << "ParsingException: " << expected << " expected, " << found << " found in " << where << std::endl;
     }
 
+    void printShort(){
+        std::cout << "ParsingException: " << expected << " expected, " << found << " found " << std::endl;
+    }
+
     private:
     std::string expected;
     std::string found;
