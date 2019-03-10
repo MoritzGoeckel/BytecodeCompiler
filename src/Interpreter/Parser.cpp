@@ -31,23 +31,25 @@ class Parser{
     std::vector<int> markers;
     int index;
 
-    const Token& getToken() const{
+    inline const Token& getToken() const{
         return LA(0);
     }
 
-    const Token& LA(int offset) const{
+    inline const Token& LA(int offset) const{
         if(index + offset >= tokens.size())
             std::cout << "Index out of bounds: " << BT;
 
         return tokens[index + offset];
     }
 
-    void printStream(int level, int max, std::string name) const{
+    inline void printStream(int level, int max, std::string name) const{
+        #if defined(VERBOSE)
         std::cout << " >> " << name << " ";
         printStream(level, max);
+        #endif
     }
 
-    void printStream(int level, int max) const{
+    inline void printStream(int level, int max) const{
         #if defined(VERBOSE)
         for(int i = 0; i < level; i++)
             std::cout << LEVEL_CHARS;
@@ -60,7 +62,7 @@ class Parser{
         #endif
     }
 
-    void print(int level, std::string str){
+    inline void print(int level, std::string str){
         #if defined(VERBOSE)
         for(int i = 0; i < level; i++)
             std::cout << LEVEL_CHARS;
@@ -69,7 +71,7 @@ class Parser{
         #endif
     }
 
-    const Token& consume(){
+    inline const Token& consume(){
         const Token& token = getToken();
         index++;
 
@@ -81,7 +83,7 @@ class Parser{
         return token;
     }
 
-    const Token& consume(int tokenType){
+    inline const Token& consume(int tokenType){
         if(getToken().getType() == tokenType){
             return consume();
         }
@@ -89,11 +91,11 @@ class Parser{
         throw ParsingException(typeToString(tokenType), typeToString(getToken().getType()), BT);
     }
 
-    void mark(){
+    inline void mark(){
         markers.push_back(this->index); 
     }
 
-    void reset(){
+    inline void reset(){
         this->index = markers.back();
         markers.pop_back();
     }
@@ -115,7 +117,7 @@ class Parser{
     bool speculate(int level, ParserFn fn);
 };
 
-bool Parser::speculate(int level, ParserFn fn){
+inline bool Parser::speculate(int level, ParserFn fn){
     bool success = true;
     mark();
     try{
@@ -133,9 +135,11 @@ bool Parser::speculate(int level, ParserFn fn){
 }
 
 ASTNode Parser::statement(int level){
+    #if defined(VERBOSE)
     print(level, "STATEMENT");
     printStream(level, MAX_TOKEN_PRINT);
     level++;
+    #endif
 
     if(speculate(level, &Parser::block))
         return block(level);
@@ -163,12 +167,14 @@ ASTNode Parser::statement(int level){
 }
 
 ASTNode Parser::block(int level){
+    #if defined(VERBOSE)
     print(level, "BLOCK");
     printStream(level, MAX_TOKEN_PRINT);
     level++;
+    #endif
     
-    ASTNode node(Token(BLOCK, ""));
     consume(OCBR); 
+    ASTNode node(Token(BLOCK, ""));
 
     while(getToken().getType() != CCBR){
         if(speculate(level, &Parser::statement))
@@ -182,9 +188,11 @@ ASTNode Parser::block(int level){
 }
 
 ASTNode Parser::expression(int level){
+    #if defined(VERBOSE)
     print(level, "EXPRESSION");
     printStream(level, MAX_TOKEN_PRINT);
     level++;
+    #endif
 
     if(speculate(level, &Parser::functionDefinition))
         return functionDefinition(level);
@@ -205,9 +213,11 @@ ASTNode Parser::expression(int level){
 }
 
 ASTNode Parser::branch(int level){
+    #if defined(VERBOSE)
     print(level, "BRANCH");
     printStream(level, MAX_TOKEN_PRINT);
     level++;
+    #endif
 
     ASTNode node(ASTNode(consume(BRANCH)));
 
@@ -225,23 +235,32 @@ ASTNode Parser::branch(int level){
 }
 
 ASTNode Parser::ret(int level){
+    #if defined(VERBOSE)
     print(level, "RETURN");
     printStream(level, MAX_TOKEN_PRINT);
     level++;
+    #endif
 
     ASTNode node(ASTNode(consume(RETURN)));
-    if(speculate(level, &Parser::expression))
-        node.addChild(expression(level));
-    else
-        throw ParsingException("expression", typeToString(getToken().getType()), BT);
 
-    return node;
+    if(getToken().getType() == SEMICOLON){
+        return node;
+    }
+
+    if(speculate(level, &Parser::expression)){
+        node.addChild(expression(level));
+        return node;
+    }
+    
+    throw ParsingException("expression", typeToString(getToken().getType()), BT);
 }
 
 ASTNode Parser::let(int level){
+    #if defined(VERBOSE)
     print(level, "LET");
     printStream(level, MAX_TOKEN_PRINT);
     level++;
+    #endif
 
     ASTNode node(ASTNode(consume(LET)));
     node.addChild(consume(IDENT));
@@ -251,9 +270,11 @@ ASTNode Parser::let(int level){
 
 //Uses custom algorithm for operator precedence
 ASTNode Parser::infixOperation(int level){
+    #if defined(VERBOSE)
     print(level, "INFIXOP");
     printStream(level, MAX_TOKEN_PRINT);
     level++;
+    #endif
 
     bool withinBrackets = false;
     if(getToken().getType() == OBR){
@@ -265,15 +286,18 @@ ASTNode Parser::infixOperation(int level){
 
     std::vector<ASTNode> stack;
     while(true){
-        //OPERAND
-        if(speculate(level, &Parser::operand) && expectingOperand){
-            stack.push_back(operand(level));
-            expectingOperand = false;
+        if(!expectingOperand && (getToken().getType() == CBR || getToken().getType() == SEMICOLON)){
+            break;
         }
         //OPERATOR
         else if(getToken().getType() == INFOP && !expectingOperand){
             stack.push_back(ASTNode(consume(INFOP)));
             expectingOperand = true;
+        }
+        //OPERAND
+        else if(speculate(level, &Parser::operand) && expectingOperand){
+            stack.push_back(operand(level));
+            expectingOperand = false;
         }
         //Open brackets
         else if(getToken().getType() == OBR){
@@ -319,9 +343,11 @@ ASTNode Parser::infixOperation(int level){
 }
 
 ASTNode Parser::operand(int level){
+    #if defined(VERBOSE)
     print(level, "OPERAND");
     printStream(level, MAX_TOKEN_PRINT);
     level++;
+    #endif
 
     if(speculate(level, &Parser::let))
         return let(level);
@@ -344,9 +370,11 @@ ASTNode Parser::operand(int level){
 }
 
 ASTNode Parser::functionDefinition(int level){
+    #if defined(VERBOSE)
     print(level, "FUNCTIONDEF");
     printStream(level, MAX_TOKEN_PRINT);
     level++;
+    #endif
 
     ASTNode identifierList(Token(IDENTLIST, ""));
 
@@ -372,9 +400,11 @@ ASTNode Parser::functionDefinition(int level){
 }
 
 ASTNode Parser::call(int level){
+    #if defined(VERBOSE)
     print(level, "CALL");
     printStream(level, MAX_TOKEN_PRINT);
     level++;
+    #endif
 
     ASTNode node(Token(CALL, ""));
     node.addChild(consume(IDENT));
