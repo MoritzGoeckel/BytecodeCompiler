@@ -20,7 +20,7 @@
 
 #include "gtest/gtest.h"
 
- /*TEST(Writer, WriteFileTest) {
+ TEST(Writer, WriteFileTest) {
   std::vector<int8> outData = {15, 30};
   ByteCode outCode(outData);
   outCode.write("testfile_vec.bc");
@@ -54,9 +54,9 @@ TEST(Lexxer, LexerTest) {
     l.getNextToken().print();
 
   std::cout << std::endl;
-}*/
+}
 
- /*TEST(Paarser, ParserTest) {
+ TEST(Parser, ParserTest) {
   Lexer l("samplecode.m");
   
   std::vector<Token> tokens;
@@ -68,7 +68,7 @@ TEST(Lexxer, LexerTest) {
   //n.print(); //TODO: Enable again?
 
   std::cout << "Done executing" << std::endl;
-}*/
+}
 
 /*TEST(Compiler, CompilerTest) {
   Lexer l("samplecode.m");
@@ -116,7 +116,7 @@ TEST(Lexxer, LexerTest) {
   std::cout << ">> Done executing" << std::endl;
 }*/
 
-TEST(Benchmarker, SampleCode2) {
+/*TEST(Benchmarker, SampleCode2) {
   Lexer l("sampleCode2.m");
   
   std::vector<Token> tokens;
@@ -132,10 +132,10 @@ TEST(Benchmarker, SampleCode2) {
   ASTNode n = p.parse();
   n.print();
   std::cout << ">> Done parsing" << std::endl;
-}
+}*/
 
-/*TEST(Transformer, FlattenFunctionsTest) {
-  Lexer l("samplecodeFlattingFns.m");
+TEST(Transformer, FlattenFunctionsTest) {
+  Lexer l("samplecode.m");
   
   std::vector<Token> tokens;
   while(!l.eof())
@@ -163,7 +163,7 @@ TEST(Benchmarker, SampleCode2) {
   for(auto f : fns){
     f.print();
   }
-}*/
+}
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

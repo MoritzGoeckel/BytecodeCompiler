@@ -139,6 +139,7 @@ inline bool Parser::speculate(int level, ParserFn fn){
     try{
         //Call the function on this object without parameters
         ((*this).*(fn)) (level);
+
     }catch(ParsingException& e){
         #if defined(VERBOSE)
         e.printShort();
@@ -169,7 +170,6 @@ ASTNode Parser::statement(int level){
         return node;
     }
 
-    //THAT IS THE UNPREDICTABLE ONE
     else if(speculate(level, &Parser::expression)){
         ASTNode node = expression(level);
         consume(SEMICOLON);
