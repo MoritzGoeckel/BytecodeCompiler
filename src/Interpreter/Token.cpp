@@ -22,15 +22,15 @@ class Token{
         this->text = text;
     }
 
-    int getType() const{
+    const int& getType() const{
         return this->type;
     }
 
-    std::string getText() const{
+    const std::string getText() const{
         return this->text;
     }
 
-    std::string getPrintString() const{
+    const std::string getPrintString() const{
         return typeToString(type) + "('" + text + "') ";
     }
 
@@ -38,7 +38,7 @@ class Token{
         std::cout << this->getPrintString(); 
     }
 
-    int getPrecedence() const{
+    const int& getPrecedence() const{
         if(getType() != INFOP)
             throw std::runtime_error("NON OP HAS NO PRECEDENCE: " + typeToString(getType()) + BT);
 

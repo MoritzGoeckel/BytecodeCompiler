@@ -36,21 +36,34 @@ class Parser{
     }
 
     inline const Token& LA(int offset) const{
+        #if defined(VERBOSE)
         if(index + offset >= tokens.size())
             std::cout << "Index out of bounds: " << BT;
+        #endif
 
         return tokens[index + offset];
     }
 
-    inline void printStream(int level, int max, std::string name) const{
-        #if defined(VERBOSE)
-        std::cout << " >> " << name << " ";
-        printStream(level, max);
-        #endif
+    inline const int& LAType(int offset) const{
+        return LA(offset).getType();
     }
 
+    inline const bool LATypeIs(int offset, int type) const{
+        if(index + offset >= tokens.size())
+            return false;
+
+        return LAType(offset) == type;
+    }
+
+    #if defined(VERBOSE)
+    inline void printStream(int level, int max, std::string name) const{
+        std::cout << " >> " << name << " ";
+        printStream(level, max);
+    }
+    #endif
+
+    #if defined(VERBOSE)
     inline void printStream(int level, int max) const{
-        #if defined(VERBOSE)
         for(int i = 0; i < level; i++)
             std::cout << LEVEL_CHARS;
 
@@ -59,26 +72,29 @@ class Parser{
         for(int i = index; i < index + max && i < tokens.size(); i++)
             tokens[i].print();
         std::cout << std::endl;
-        #endif
     }
+    #endif
 
+    #if defined(VERBOSE)
     inline void print(int level, std::string str){
-        #if defined(VERBOSE)
         for(int i = 0; i < level; i++)
             std::cout << LEVEL_CHARS;
 
         std::cout << str << std::endl;
-        #endif
     }
+    #endif
 
     inline const Token& consume(){
         const Token& token = getToken();
         index++;
 
+        //TODO: Maybe we need this check here...
+        #if defined(VERBOSE)
         if(index > tokens.size()){
             std::cout << "Index out of bounds: " << BT;
             throw ParsingException("ANY", "END OF TOKENS", BT);
         }
+        #endif
 
         return token;
     }
@@ -141,25 +157,27 @@ ASTNode Parser::statement(int level){
     level++;
     #endif
 
-    if(speculate(level, &Parser::block))
+    if(LAType(0) == OCBR && speculate(level, &Parser::block))
         return block(level);
 
-    else if(speculate(level, &Parser::branch))
+    else if(LAType(0) == BRANCH && speculate(level, &Parser::branch))
         return branch(level);
 
-    else if(speculate(level, &Parser::ret)){
+    else if(LAType(0) == RETURN && speculate(level, &Parser::ret)){
         ASTNode node = ret(level);
         consume(SEMICOLON);
         return node;
     }
 
+    //THAT IS THE UNPREDICTABLE ONE
     else if(speculate(level, &Parser::expression)){
         ASTNode node = expression(level);
         consume(SEMICOLON);
         return node;
     }
 
-    else if(speculate(level, &Parser::let))
+    //TODO PUSH HIGHER
+    else if(LAType(0) == LET && speculate(level, &Parser::let))
         return let(level);
 
     else
@@ -194,10 +212,12 @@ ASTNode Parser::expression(int level){
     level++;
     #endif
 
-    if(speculate(level, &Parser::functionDefinition))
+    if(LAType(0) == OBR 
+    && (LATypeIs(1, IDENT) || LATypeIs(1, CBR)) 
+    && speculate(level, &Parser::functionDefinition))
         return functionDefinition(level);
     
-    if(speculate(level, &Parser::call))
+    if(LAType(0) == IDENT && speculate(level, &Parser::call))
         return call(level);
 
     if(speculate(level, &Parser::infixOperation))
@@ -226,10 +246,10 @@ ASTNode Parser::branch(int level){
     else
         throw ParsingException("expression", typeToString(getToken().getType()), BT);
 
-    if(speculate(level, &Parser::block))
-        node.addChild(block(level));
+    if(speculate(level, &Parser::statement))
+        node.addChild(statement(level));
     else
-        throw ParsingException("block", typeToString(getToken().getType()), BT);
+        throw ParsingException("statement", typeToString(getToken().getType()), BT);
 
     return node;
 }
@@ -277,7 +297,7 @@ ASTNode Parser::infixOperation(int level){
     #endif
 
     bool withinBrackets = false;
-    if(getToken().getType() == OBR){
+    if(LAType(0) == OBR){
         consume(OBR);
         withinBrackets = true;
     }
@@ -290,7 +310,7 @@ ASTNode Parser::infixOperation(int level){
             break;
         }
         //OPERATOR
-        else if(getToken().getType() == INFOP && !expectingOperand){
+        else if(LAType(0) == INFOP && !expectingOperand){
             stack.push_back(ASTNode(consume(INFOP)));
             expectingOperand = true;
         }
@@ -300,7 +320,7 @@ ASTNode Parser::infixOperation(int level){
             expectingOperand = false;
         }
         //Open brackets
-        else if(getToken().getType() == OBR){
+        else if(LAType(0) == OBR){
             stack.push_back(infixOperation(level));
             expectingOperand = false;
         }
@@ -311,8 +331,6 @@ ASTNode Parser::infixOperation(int level){
 
     if(withinBrackets)
         consume(CBR);
-
-    //std::cout << std::to_string(stack.size()) << " STACK SIZE!!" << std::endl;
     
     if(stack.size() == 0 || stack.size() % 2 == 0)
         throw ParsingException("BAD STACK SIZE", "", BT);
@@ -349,20 +367,22 @@ ASTNode Parser::operand(int level){
     level++;
     #endif
 
-    if(speculate(level, &Parser::let))
+    if(LAType(0) == LET && speculate(level, &Parser::let))
         return let(level);
 
-    else if(speculate(level, &Parser::functionDefinition))
+    else if(LAType(0) == OBR 
+    && (LATypeIs(1, IDENT) || LATypeIs(1, CBR)) 
+    && speculate(level, &Parser::functionDefinition))
         return functionDefinition(level);
 
-    else if(speculate(level, &Parser::call))
+    else if(LATypeIs(0, IDENT) && speculate(level, &Parser::call))
         return call(level);
 
-    else if(getToken().getType() == NUMLIT){
+    else if(LATypeIs(0, NUMLIT)){
         return ASTNode(consume(NUMLIT));
     }
 
-    else if(getToken().getType() == IDENT)
+    else if(LATypeIs(0, IDENT))
         return ASTNode(consume(IDENT));
 
     else 
@@ -391,7 +411,7 @@ ASTNode Parser::functionDefinition(int level){
     ASTNode node(Token(FUNDEF, ""));
     node.addChild(identifierList);
 
-    if(speculate(level, &Parser::block))
+    if(LAType(0) == OCBR && speculate(level, &Parser::block))
         node.addChild(block(level));
     else
         throw ParsingException("block", typeToString(getToken().getType()), BT);    
