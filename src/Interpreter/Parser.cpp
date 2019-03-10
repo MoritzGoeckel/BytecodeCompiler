@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "Token.cpp"
 #include "../ErrorHandling.cpp"
@@ -27,6 +28,9 @@ class Parser{
 
     private:
     
+    //[RuleId][Index] -> StopTokenIndex
+    std::map<int, std::map<int, int>> cache;
+
     std::vector<Token> tokens;
     std::vector<int> markers;
     int index;
@@ -53,6 +57,26 @@ class Parser{
             return false;
 
         return LAType(offset) == type;
+    }
+
+    inline void skipTo(int index){
+        this->index = index;
+    }
+    
+    const int CACHE_MISS = -2;
+    const int FAILED_TO_PARSE = -1;
+    inline void memorize(int ruleId, int stopIndex){
+        cache[ruleId][this->index] = stopIndex;
+    }
+
+    inline int checkCache(int ruleId){
+        if(cache.find(ruleId) == cache.end())
+            return CACHE_MISS;
+
+        if(cache[ruleId].find(this->index) == cache[ruleId].end())
+            return CACHE_MISS;
+        
+        return cache[ruleId][this->index];
     }
 
     #if defined(VERBOSE)
@@ -134,19 +158,36 @@ class Parser{
 };
 
 inline bool Parser::speculate(int level, ParserFn fn){
+    long ruleId = (long)&fn;
     bool success = true;
-    mark();
-    try{
-        //Call the function on this object without parameters
-        ((*this).*(fn)) (level);
 
-    }catch(ParsingException& e){
-        #if defined(VERBOSE)
-        e.printShort();
-        #endif
-        success = false;
+    int cacheResult = checkCache(ruleId);
+    //Already parsed and unsuccessful
+    if(cacheResult == FAILED_TO_PARSE){
+        return false;
     }
-    reset();
+    //Success
+    else if(cacheResult != CACHE_MISS && cacheResult != FAILED_TO_PARSE){
+        skipTo(cacheResult);
+        return true;
+    }
+    //Cache miss
+    else if(cacheResult == CACHE_MISS){
+        mark();
+        try{
+            //Call the function on this object without parameters
+            ((*this).*(fn)) (level);
+        }catch(ParsingException& e){
+            #if defined(VERBOSE)
+            e.printShort();
+            #endif
+            success = false;
+        }
+
+        memorize(ruleId, success ? this->index : FAILED_TO_PARSE);
+
+        reset();
+    }
 
     return success;
 }

@@ -135,7 +135,7 @@ TEST(Lexxer, LexerTest) {
 }*/
 
 TEST(Transformer, FlattenFunctionsTest) {
-  Lexer l("samplecode.m");
+  Lexer l("sampleCode2.m");
   
   std::vector<Token> tokens;
   while(!l.eof())
