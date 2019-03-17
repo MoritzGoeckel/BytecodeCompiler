@@ -1,22 +1,22 @@
 #include <iostream>
 #include <vector>
 
-#include "VM/OptCodeEngine.cpp"
-#include "VM/Memory.cpp"
-#include "VM/ByteCode.cpp"
+#include "../VM/OptCodeEngine.cpp"
+#include "../VM/Memory.cpp"
+#include "../VM/ByteCode.cpp"
 
-#include "VM/Types.cpp"
-#include "ErrorHandling.cpp"
+#include "../VM/Types.cpp"
+#include "../ErrorHandling.cpp"
 
-#include "VM/Assembler.cpp"
-#include "VM/Executer.cpp"
+#include "../VM/Assembler.cpp"
+#include "../VM/Executer.cpp"
 
-#include "Interpreter/Lexer.cpp"
-#include "Interpreter/Parser.cpp"
+#include "../Interpreter/Lexer.cpp"
+#include "../Interpreter/Parser.cpp"
 
-#include "Interpreter/Compiler.cpp"
+#include "../Interpreter/Compiler.cpp"
 
-#include "Interpreter/Transformers/FunctionFlatter.cpp"
+#include "../Interpreter/Transformers/FunctionFlatter.cpp"
 
 #include "gtest/gtest.h"
 
@@ -139,7 +139,7 @@ TEST(Benchmarker, SampleCode2) {
 */
 
 TEST(Transformer, FlattenFunctionsTest) {
-  Lexer l("sampleCode2.m");
+  Lexer l("MFiles/sampleCode2.m");
   
   std::vector<Token> tokens;
   while(!l.eof())
