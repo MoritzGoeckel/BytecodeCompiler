@@ -20,5 +20,5 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(CMAKE_CXX_FLAGS "-Wall -O3 -Wno-unused-variable")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O3 -Wno-unused-variable")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wno-unused-variable")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -g -O3 -Wno-unused-variable")
+set(CMAKE_CXX_FLAGS_RELEASE "-Wall -O3 -Wno-unused-variable")
