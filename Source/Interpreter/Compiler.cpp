@@ -63,9 +63,9 @@ std::string Compiler::infop(const ASTNode& node, std::string varname){
     if(nodeText == "="){
         std::string actualVarname = "";
         
-        if(node.getChild(0).getTokenType() == TokenTypes::IDENT){
+        if(node.getChild(0).getTokenType() == TokenType::IDENT){
             actualVarname = node.getChild(0).getToken().getText();
-        }else if(node.getChild(0).getTokenType() == TokenTypes::LET){
+        }else if(node.getChild(0).getTokenType() == TokenType::LET){
             actualVarname = node.getChild(0).getChild(0).getToken().getText();
         }else{
             throw std::runtime_error("Expecting IDENT or LET on the left side" + BT);
@@ -168,23 +168,23 @@ std::string Compiler::call(const ASTNode& node, std::string varname){
 }
 
 std::string Compiler::expression(const ASTNode& node, std::string varname){
-    if(node.getTokenType() == TokenTypes::INFOP){
+    if(node.getTokenType() == TokenType::INFOP){
         return infop(node, varname);
     }
 
-    if(node.getTokenType() == TokenTypes::NUMLIT){
+    if(node.getTokenType() == TokenType::NUMLIT){
         return numlit(node, varname);
     }
 
-    if(node.getTokenType() == TokenTypes::CALL){
+    if(node.getTokenType() == TokenType::CALL){
         return call(node, varname);
     }
 
-    if(node.getTokenType() == TokenTypes::FUNDEF){
+    if(node.getTokenType() == TokenType::FUNDEF){
         return funDef(node, varname);
     }
 
-    if(node.getTokenType() == TokenTypes::IDENT){
+    if(node.getTokenType() == TokenType::IDENT){
         //Todo: This is not the most efficient way
         return "COPY %" + node.getToken().getText() + " %" + varname + endl;
     }
@@ -201,11 +201,11 @@ std::string Compiler::emit(const ASTNode& node, std::string varname){
     //std::cout << "COMP varname" << std::endl;
     int type = node.getTokenType();
 
-    if(type == TokenTypes::BLOCK){
+    if(type == TokenType::BLOCK){
         return block(node);
     }
 
-    if(type == TokenTypes::INFOP || type == TokenTypes::NUMLIT || type == TokenTypes::CALL || type == TokenTypes::IDENT || type == TokenTypes::FUNDEF){
+    if(type == TokenType::INFOP || type == TokenType::NUMLIT || type == TokenType::CALL || type == TokenType::IDENT || type == TokenType::FUNDEF){
         return expression(node, varname);
     }
 

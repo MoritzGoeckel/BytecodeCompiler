@@ -13,16 +13,16 @@ class Token{
     public:
     
     Token(){
-        this->type = TokenTypes::UNINITIALIZED;
+        this->type = TokenType::UNINITIALIZED;
         this->text = "!!!!!!!!!!!";
     }
 
-    Token(int type, std::string text){
+    Token(TokenType type, std::string text){
         this->type = type;
         this->text = text;
     }
 
-    const int& getType() const{
+    const TokenType getType() const{
         return this->type;
     }
 
@@ -39,7 +39,7 @@ class Token{
     }
 
     const int getPrecedence() const{
-        if(getType() != TokenTypes::INFOP)
+        if(getType() != TokenType::INFOP)
             throw std::runtime_error("NON OP HAS NO PRECEDENCE: " + typeToString(getType()) + BT);
 
         if(precedences.find(getText()) == precedences.end())
@@ -50,6 +50,6 @@ class Token{
 
     private: 
 
-    int type;
+    TokenType type;
     std::string text;
 };

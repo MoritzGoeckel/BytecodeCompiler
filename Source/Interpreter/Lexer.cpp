@@ -28,39 +28,39 @@ class Lexer{
     Token getNextToken(){
         consumeWhitespace();
 
-        if(getChar() == '{') { consume(); return Token(TokenTypes::OCBR, "{"); }
-        if(getChar() == '}') { consume(); return Token(TokenTypes::CCBR, "}"); }
-        if(getChar() == '(') { consume(); return Token(TokenTypes::OBR, "("); }
-        if(getChar() == ')') { consume(); return Token(TokenTypes::CBR, ")"); }
+        if(getChar() == '{') { consume(); return Token(TokenType::OCBR, "{"); }
+        if(getChar() == '}') { consume(); return Token(TokenType::CCBR, "}"); }
+        if(getChar() == '(') { consume(); return Token(TokenType::OBR, "("); }
+        if(getChar() == ')') { consume(); return Token(TokenType::CBR, ")"); }
 
-        if(getChar() == '+') { consume(); return Token(TokenTypes::INFOP, "+"); }
-        if(getChar() == '-') { consume(); return Token(TokenTypes::INFOP, "-"); }
-        if(matches("&&")) { consume("&&"); return Token(TokenTypes::INFOP, "&&"); }
-        if(matches("||")) { consume("||"); return Token(TokenTypes::INFOP, "||"); }
-        if(getChar() == '/') { consume(); return Token(TokenTypes::INFOP, "/"); }
-        if(getChar() == '*') { consume(); return Token(TokenTypes::INFOP, "*"); }
+        if(getChar() == '+') { consume(); return Token(TokenType::INFOP, "+"); }
+        if(getChar() == '-') { consume(); return Token(TokenType::INFOP, "-"); }
+        if(matches("&&")) { consume("&&"); return Token(TokenType::INFOP, "&&"); }
+        if(matches("||")) { consume("||"); return Token(TokenType::INFOP, "||"); }
+        if(getChar() == '/') { consume(); return Token(TokenType::INFOP, "/"); }
+        if(getChar() == '*') { consume(); return Token(TokenType::INFOP, "*"); }
     
-        if(getChar() == '=') { consume(); return Token(TokenTypes::INFOP, "="); }
+        if(getChar() == '=') { consume(); return Token(TokenType::INFOP, "="); }
 
-        if(matches("==")) { consume("=="); return Token(TokenTypes::INFOP, "=="); }
-        if(matches("!=")) { consume("!="); return Token(TokenTypes::INFOP, "!="); }
-        if(getChar() == '>') { consume(); return Token(TokenTypes::INFOP, ">"); }
-        if(getChar() == '<') { consume(); return Token(TokenTypes::INFOP, "<"); }
+        if(matches("==")) { consume("=="); return Token(TokenType::INFOP, "=="); }
+        if(matches("!=")) { consume("!="); return Token(TokenType::INFOP, "!="); }
+        if(getChar() == '>') { consume(); return Token(TokenType::INFOP, ">"); }
+        if(getChar() == '<') { consume(); return Token(TokenType::INFOP, "<"); }
 
-        if(matches("return")) { consume("return"); return Token(TokenTypes::RETURN, "return"); }
-        if(matches("if")) { consume("if"); return Token(TokenTypes::BRANCH, "if"); }
-        if(matches("while")) { consume("while"); return Token(TokenTypes::BRANCH, "while"); }
+        if(matches("return")) { consume("return"); return Token(TokenType::RETURN, "return"); }
+        if(matches("if")) { consume("if"); return Token(TokenType::BRANCH, "if"); }
+        if(matches("while")) { consume("while"); return Token(TokenType::BRANCH, "while"); }
 
-        if(matches("let")) { consume("let"); return Token(TokenTypes::LET, ""); }
+        if(matches("let")) { consume("let"); return Token(TokenType::LET, ""); }
         
-        if(getChar() == ',') { consume(); return Token(TokenTypes::COMMA, ","); } 
-        if(getChar() == ';') { consume(); return Token(TokenTypes::SEMICOLON, ";"); }
+        if(getChar() == ',') { consume(); return Token(TokenType::COMMA, ","); } 
+        if(getChar() == ';') { consume(); return Token(TokenType::SEMICOLON, ";"); }
               
         if(isdigit(getChar()))
-            return Token(TokenTypes::NUMLIT, consumeAlphanumWord());
+            return Token(TokenType::NUMLIT, consumeAlphanumWord());
 
         if(isalpha(getChar()))
-            return Token(TokenTypes::IDENT, consumeAlphanumWord());
+            return Token(TokenType::IDENT, consumeAlphanumWord());
 
         //Will never happen
         throw std::runtime_error("Token unknown: " + std::string(1, getChar()) + BT);
