@@ -19,7 +19,7 @@ class Parser{
     
     Parser(const std::vector<Token>& tokens){
         this->tokens = tokens;
-        this->index = 0;
+        this->index = 0u;
     } 
 
     ASTNode parse(){
@@ -29,7 +29,7 @@ class Parser{
     private:
     
     //[RuleId][Index] -> StopTokenIndex
-    std::map<size_t, std::map<size_t, size_t>> cache;
+    std::map<size_t, std::map<std::string, int>> cache;
 
     std::vector<Token> tokens;
     std::vector<size_t> markers;
@@ -58,25 +58,24 @@ class Parser{
 
         return LAType(offset) == type;
     }
-
-    inline void skipTo(size_t index){
-        this->index = index;
-    }
     
+    const int PARSE_SUCCESS = -3;
     const int CACHE_MISS = -2;
     const int FAILED_TO_PARSE = -1;
-    inline void memorize(size_t ruleId, size_t stopIndex){
-        cache[ruleId][this->index] = stopIndex;
+    inline void memorize(size_t index, std::string ruleId, int result){
+        cache[index][ruleId] = result; //Result could be stop index
     }
 
-    inline int checkCache(size_t ruleId){
-        if(cache.find(ruleId) == cache.end())
+    inline int checkCache(size_t index, std::string ruleId){
+        if(cache.find(index) == cache.end()){
             return CACHE_MISS;
+        }
 
-        if(cache[ruleId].find(this->index) == cache[ruleId].end())
+        if(cache[index].find(ruleId) == cache[index].end()){
             return CACHE_MISS;
+        }
         
-        return cache[ruleId][this->index];
+        return cache[index][ruleId];
     }
 
     #if defined(VERBOSE)
@@ -154,26 +153,32 @@ class Parser{
     ASTNode operand(size_t level);
 
     typedef ASTNode (Parser::*ParserFn)(size_t);
-    bool speculate(size_t level, ParserFn fn);
+    bool speculate(size_t level, ParserFn fn, std::string ruleId);
 };
 
 //TODO: Speculation could be done with templates to make it faster
-inline bool Parser::speculate(size_t level, ParserFn fn){
-    long ruleId = (long)&fn;
+inline bool Parser::speculate(size_t level, ParserFn fn, std::string ruleId){
     bool success = true;
+    size_t startIndex = this->index;
 
-    int cacheResult = checkCache(ruleId);
+    const int cacheResult = checkCache(startIndex, ruleId);
+    
     //Already parsed and unsuccessful
     if(cacheResult == FAILED_TO_PARSE){
         return false;
     }
+
     //Success
-    else if(cacheResult != CACHE_MISS && cacheResult != FAILED_TO_PARSE){
-        skipTo(cacheResult);
+    if(cacheResult == PARSE_SUCCESS){
+    //if(cacheResult != CACHE_MISS && cacheResult != FAILED_TO_PARSE){
+        //skipTo(cacheResult); //This should be like this ... thats a problem.
+        //Would like to skip non speculates too
+        //Whu do i need stop index if i dont use it
         return true;
     }
+    
     //Cache miss
-    else if(cacheResult == CACHE_MISS){
+    if(cacheResult == CACHE_MISS){
         mark();
         try{
             //Call the function on this object without parameters
@@ -184,10 +189,17 @@ inline bool Parser::speculate(size_t level, ParserFn fn){
             #endif
             success = false;
         }
-
-        memorize(ruleId, success ? this->index : FAILED_TO_PARSE);
-
+        //int stopIndex = static_cast<int>(this->index);
         reset();
+
+        //ASSERT if(cacheResult == PARSE_SUCCESS && success == false)
+        //ASSERT if(cacheResult == FAILED_TO_PARSE && success)
+
+        memorize(
+            startIndex, 
+            ruleId, 
+            success ? PARSE_SUCCESS : FAILED_TO_PARSE
+        );
     }
 
     return success;
@@ -200,25 +212,25 @@ ASTNode Parser::statement(size_t level){
     level++;
     #endif
 
-    if(LAType(0) == OCBR && speculate(level, &Parser::block))
+    if(LAType(0) == OCBR && speculate(level, &Parser::block, "block"))
         return block(level);
 
-    else if(LAType(0) == BRANCH && speculate(level, &Parser::branch))
+    else if(LAType(0) == BRANCH && speculate(level, &Parser::branch, "branch"))
         return branch(level);
 
-    else if(LAType(0) == RETURN && speculate(level, &Parser::ret)){
+    else if(LAType(0) == RETURN && speculate(level, &Parser::ret, "ret")){
         ASTNode node = ret(level);
         consume(SEMICOLON);
         return node;
     }
 
-    else if(speculate(level, &Parser::expression)){
+    else if(speculate(level, &Parser::expression, "expression")){
         ASTNode node = expression(level);
         consume(SEMICOLON);
         return node;
     }
 
-    else if(LAType(0) == LET && speculate(level, &Parser::let))
+    else if(LAType(0) == LET && speculate(level, &Parser::let, "let"))
         return let(level);
 
     else
@@ -236,7 +248,7 @@ ASTNode Parser::block(size_t level){
     ASTNode node(Token(BLOCK, ""));
 
     while(getToken().getType() != CCBR){
-        if(speculate(level, &Parser::statement))
+        if(speculate(level, &Parser::statement, "statement"))
             node.addChild(statement(level));
         else
             throw ParsingException("statement", typeToString(getToken().getType()), BT);
@@ -255,13 +267,13 @@ ASTNode Parser::expression(size_t level){
 
     if(LAType(0) == OBR 
     && (LATypeIs(1, IDENT) || LATypeIs(1, CBR)) 
-    && speculate(level, &Parser::functionDefinition))
+    && speculate(level, &Parser::functionDefinition, "functionDefinition"))
         return functionDefinition(level);
     
-    if(LAType(0) == IDENT && speculate(level, &Parser::call))
+    if(LAType(0) == IDENT && speculate(level, &Parser::call, "call"))
         return call(level);
 
-    if(speculate(level, &Parser::infixOperation))
+    if(speculate(level, &Parser::infixOperation, "infixOperation"))
         return infixOperation(level);
 
     if(getToken().getType() == NUMLIT)
@@ -282,12 +294,12 @@ ASTNode Parser::branch(size_t level){
 
     ASTNode node(ASTNode(consume(BRANCH)));
 
-    if(speculate(level, &Parser::expression))
+    if(speculate(level, &Parser::expression, "expression"))
         node.addChild(expression(level));
     else
         throw ParsingException("expression", typeToString(getToken().getType()), BT);
 
-    if(speculate(level, &Parser::statement))
+    if(speculate(level, &Parser::statement, "statement"))
         node.addChild(statement(level));
     else
         throw ParsingException("statement", typeToString(getToken().getType()), BT);
@@ -308,7 +320,7 @@ ASTNode Parser::ret(size_t level){
         return node;
     }
 
-    if(speculate(level, &Parser::expression)){
+    if(speculate(level, &Parser::expression, "expression")){
         node.addChild(expression(level));
         return node;
     }
@@ -356,7 +368,7 @@ ASTNode Parser::infixOperation(size_t level){
             expectingOperand = true;
         }
         //OPERAND
-        else if(speculate(level, &Parser::operand) && expectingOperand){
+        else if(speculate(level, &Parser::operand, "operand") && expectingOperand){
             stack.push_back(operand(level));
             expectingOperand = false;
         }
@@ -408,15 +420,15 @@ ASTNode Parser::operand(size_t level){
     level++;
     #endif
 
-    if(LAType(0) == LET && speculate(level, &Parser::let))
+    if(LAType(0) == LET && speculate(level, &Parser::let, "let"))
         return let(level);
 
     else if(LAType(0) == OBR 
     && (LATypeIs(1, IDENT) || LATypeIs(1, CBR)) 
-    && speculate(level, &Parser::functionDefinition))
+    && speculate(level, &Parser::functionDefinition, "functionDefinition"))
         return functionDefinition(level);
 
-    else if(LATypeIs(0, IDENT) && speculate(level, &Parser::call))
+    else if(LATypeIs(0, IDENT) && speculate(level, &Parser::call, "call"))
         return call(level);
 
     else if(LATypeIs(0, NUMLIT)){
@@ -452,7 +464,7 @@ ASTNode Parser::functionDefinition(size_t level){
     ASTNode node(Token(FUNDEF, ""));
     node.addChild(identifierList);
 
-    if(LAType(0) == OCBR && speculate(level, &Parser::block))
+    if(LAType(0) == OCBR && speculate(level, &Parser::block, "block"))
         node.addChild(block(level));
     else
         throw ParsingException("block", typeToString(getToken().getType()), BT);    
