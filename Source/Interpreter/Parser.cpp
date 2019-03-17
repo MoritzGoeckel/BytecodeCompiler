@@ -31,7 +31,7 @@ class Parser{
     enum Rule {BLOCK, STATEMENT, EXPRESSION, LET, BRANCH, RET, INFIX_OPERATION, FUNCTION_DEFINITION, CALL, OPERAND};    
     enum CacheResult {SUCCESS, FAILURE, MISS};
 
-    //[RuleId][Index] -> StopTokenIndex
+    //[RuleId][Index] -> CacheResult
     std::map<size_t, std::map<Rule, CacheResult>> cache;
 
     std::vector<Token> tokens;
