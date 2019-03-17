@@ -12,7 +12,7 @@
 #define MAX_TOKEN_PRINT 8
 #define LEVEL_CHARS "   "
 
-#define VERBOSE
+//#define VERBOSE
 
 class Parser{
     public:
@@ -158,57 +158,37 @@ class Parser{
 
 //TODO: Speculation could be done with templates to make it faster
 inline bool Parser::speculate(size_t level, ParserFn fn, Rule ruleId){
-    std::cout << ruleId << std::endl;
+    const CacheResult cacheResult = checkCache(this->index, ruleId);
+    switch(cacheResult){
+        case CacheResult::FAILURE:
+            return false;
+        
+        case CacheResult::SUCCESS:
+            return true;
 
-    bool success = true;
-    size_t startIndex = this->index;
+        case CacheResult::MISS:
+            bool success = true;
+            mark();
+            try{
+                //Call the function on this object without parameters
+                ((*this).*(fn)) (level);
+            }catch(ParsingException& e){
+                #if defined(VERBOSE)
+                e.printShort();
+                #endif
+                success = false;
+            }
+            reset();
 
-    const CacheResult cacheResult = checkCache(startIndex, ruleId);
-    
-    if(ruleId == Rule::LET){
-        std::cout << "LET " << cacheResult  << std::endl;
+            memorize(
+                this->index, 
+                ruleId, 
+                success ? SUCCESS : FAILURE
+            );
+            return success;
     }
 
-    //Already parsed and unsuccessful
-    if(cacheResult == FAILURE){
-        return false;
-    }
-
-    //Success
-    if(cacheResult == SUCCESS){
-    //if(cacheResult != CACHE_MISS && cacheResult != FAILED_TO_PARSE){
-        //skipTo(cacheResult); //This should be like this ... thats a problem.
-        //Would like to skip non speculates too
-        //Whu do i need stop index if i dont use it
-        return true;
-    }
-    
-    //Cache miss
-    if(cacheResult == MISS){
-        mark();
-        try{
-            //Call the function on this object without parameters
-            ((*this).*(fn)) (level);
-        }catch(ParsingException& e){
-            #if defined(VERBOSE)
-            e.printShort();
-            #endif
-            success = false;
-        }
-        //int stopIndex = static_cast<int>(this->index);
-        reset();
-
-        //ASSERT if(cacheResult == PARSE_SUCCESS && success == false)
-        //ASSERT if(cacheResult == FAILED_TO_PARSE && success)
-
-        memorize(
-            startIndex, 
-            ruleId, 
-            success ? SUCCESS : FAILURE
-        );
-    }
-
-    return success;
+    throw std::runtime_error("Unexpected cache result" + BT);
 }
 
 ASTNode Parser::statement(size_t level){
