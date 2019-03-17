@@ -7,7 +7,7 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
  
 add_executable(runTests 
-  src/Tests/Tests.cpp
+  Source/Tests/Tests.cpp
 )
 
 target_link_libraries(runTests 
