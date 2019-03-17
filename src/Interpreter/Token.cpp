@@ -38,7 +38,7 @@ class Token{
         std::cout << this->getPrintString(); 
     }
 
-    const int& getPrecedence() const{
+    const int getPrecedence() const{
         if(getType() != INFOP)
             throw std::runtime_error("NON OP HAS NO PRECEDENCE: " + typeToString(getType()) + BT);
 

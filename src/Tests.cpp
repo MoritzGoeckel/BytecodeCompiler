@@ -20,7 +20,9 @@
 
 #include "gtest/gtest.h"
 
- TEST(Writer, WriteFileTest) {
+/*
+
+TEST(Writer, WriteFileTest) {
   std::vector<int8> outData = {15, 30};
   ByteCode outCode(outData);
   outCode.write("testfile_vec.bc");
@@ -70,7 +72,7 @@ TEST(Lexxer, LexerTest) {
   std::cout << "Done executing" << std::endl;
 }
 
-/*TEST(Compiler, CompilerTest) {
+TEST(Compiler, CompilerTest) {
   Lexer l("samplecode.m");
   
   std::vector<Token> tokens;
@@ -85,9 +87,9 @@ TEST(Lexxer, LexerTest) {
   std::cout << c.compile(n) << std::endl;
 
   std::cout << "Done compiling" << std::endl;
-}*/
+}
 
- /*TEST(Integration, IntegrationTest) {
+ TEST(Integration, IntegrationTest) {
   Lexer l("samplecode.m");
   
   std::vector<Token> tokens;
@@ -114,9 +116,9 @@ TEST(Lexxer, LexerTest) {
 
   execute(code);
   std::cout << ">> Done executing" << std::endl;
-}*/
+}
 
-/*TEST(Benchmarker, SampleCode2) {
+TEST(Benchmarker, SampleCode2) {
   Lexer l("sampleCode2.m");
   
   std::vector<Token> tokens;
@@ -132,7 +134,9 @@ TEST(Lexxer, LexerTest) {
   ASTNode n = p.parse();
   n.print();
   std::cout << ">> Done parsing" << std::endl;
-}*/
+}
+
+*/
 
 TEST(Transformer, FlattenFunctionsTest) {
   Lexer l("sampleCode2.m");

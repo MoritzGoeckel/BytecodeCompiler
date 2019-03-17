@@ -58,8 +58,8 @@ static ByteCode assembleStream(std::stringstream& ss){
         std::cout << "LINE: " << s << std::endl;*/
 
     //Detect, index and remove labels
-    int codeIndex = 0;
-    for(int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
+    size_t codeIndex = 0u;
+    for(size_t lineIndex = 0u; lineIndex < lines.size(); lineIndex++) {
         std::vector<std::string> tokens;
         split(lines[lineIndex], tokens, ' ');
         
@@ -110,8 +110,8 @@ static ByteCode assembleStream(std::stringstream& ss){
         //std::cout << "CMD: " << tokens[0] << "\tP1: " << tokens[1] << "\tP2: " << tokens[2] << std::endl;
 
         //Statement
-        code.add(opts.encodeOptString(tokens[0]));
-        for(int i = 1; i < tokens.size(); i++){
+        code.add(opts.encodeOptString(tokens[0u]));
+        for(size_t i = 1u; i < tokens.size(); i++){
             if(tokens[i].front() == '%'){
                 //std::cout << "'" << tokens[i] << "'" << std::endl;
 

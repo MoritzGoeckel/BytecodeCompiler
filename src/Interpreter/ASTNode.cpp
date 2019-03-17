@@ -4,8 +4,8 @@
 #include <iostream>
 #include "Token.cpp"
 
-static void printSpace(int num){
-    for(int i = 0; i < num; i++)
+static void printSpace(size_t num){
+    for(size_t i = 0; i < num; i++)
         std::cout << " ";
 }
 
@@ -15,17 +15,17 @@ class ASTNode{
     std::vector<ASTNode> children;
     Token token;
 
-    void print(int indent) const{
+    void print(size_t indent) const{
         printSpace(indent);
         token.print();
         std::cout << std::endl;
 
-        if(children.size() != 0){
+        if(children.size() != 0u){
             printSpace(indent);
             std::cout << "{" << std::endl;
             
             for(auto const& t: children)
-                t.print(indent + 5);
+                t.print(indent + 5u);
             
             printSpace(indent);            
             std::cout << "}" << std::endl;
@@ -58,19 +58,19 @@ class ASTNode{
         print(0);
     }
 
-    const int getChildCount() const{
+    const size_t getChildCount() const{
         return children.size();
     }
 
-    const ASTNode& getChild(int index) const{
+    const ASTNode& getChild(size_t index) const{
         return children[index];
     }
 
-    ASTNode& getChildMutable(int index){
+    ASTNode& getChildMutable(size_t index){
         return children[index];
     }
 
-    void setChild(int index, ASTNode& child){
+    void setChild(size_t index, ASTNode& child){
         children[index] = child;
     }
 };

@@ -67,12 +67,12 @@ class Lexer{
     }
  
     bool eof(){
-        return this->index >= this->input.length() - 1;
+        return this->index >= this->input.length() - 1u;
     }   
 
     private:
 
-    int index;
+    size_t index;
     std::string input;
 
     void consume(){
@@ -83,7 +83,7 @@ class Lexer{
         return this->input.at(index);
     }
 
-    char getCharLookahead(int offset){
+    char getCharLookahead(size_t offset){
         return this->input.at(index + offset);
     }
 
@@ -97,7 +97,7 @@ class Lexer{
     }
 
     bool matches(std::string pattern){
-        for(int i = 0; i < pattern.length(); i++){
+        for(size_t i = 0; i < pattern.length(); i++){
             if(pattern.at(i) != this->getCharLookahead(i))
                 return false;
         }

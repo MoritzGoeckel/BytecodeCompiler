@@ -5,18 +5,20 @@
 #include <vector>
 #include <map>
 
-std::map<std::string, int> precedences = {
-    {"*", 5}, 
-    {"/", 5}, 
-    {"+", 6},
-    {"-", 6},
-    {"&&", 6},
-    {"||", 6}, 
-    {"==", 7}, 
-    {"!=", 7},
-    {"<", 7}, 
-    {">", 7}, 
-    {"=", 8}
+#include "../ErrorHandling.cpp"
+
+std::map<std::string, size_t> precedences = {
+    {"*", 5u}, 
+    {"/", 5u}, 
+    {"+", 6u},
+    {"-", 6u},
+    {"&&", 6u},
+    {"||", 6u}, 
+    {"==", 7u}, 
+    {"!=", 7u},
+    {"<", 7u}, 
+    {">", 7u}, 
+    {"=", 8u}
 };
 
 std::vector<std::string> types = {
@@ -41,29 +43,29 @@ std::vector<std::string> types = {
     "FNREF"
 };
 
-std::string typeToString(int type){
+std::string typeToString(size_t type){
     if(type >= types.size())
         std::cout << "Index out of bounds: " << BT;
     
     return types[type];
 }
 
-const int OCBR = 0;
-const int CCBR = 1;
-const int OBR = 2;
-const int CBR = 3;
-const int INFOP = 4;
-const int RETURN = 5;
-const int COMMA = 6;
-const int SEMICOLON = 7;
-const int IDENT = 8;
-const int BRANCH = 9;
-const int NUMLIT = 10;
-const int BLOCK = 11;
-const int IDENTLIST = 12;
-const int FUNDEF = 13;
-const int EXPRESSIONLIST = 14;
-const int CALL = 15;
-const int UNINITIALIZED = 16;
-const int LET = 17;
-const int FNREF = 18;
+const size_t OCBR = 0;
+const size_t CCBR = 1;
+const size_t OBR = 2;
+const size_t CBR = 3;
+const size_t INFOP = 4;
+const size_t RETURN = 5;
+const size_t COMMA = 6;
+const size_t SEMICOLON = 7;
+const size_t IDENT = 8;
+const size_t BRANCH = 9;
+const size_t NUMLIT = 10;
+const size_t BLOCK = 11;
+const size_t IDENTLIST = 12;
+const size_t FUNDEF = 13;
+const size_t EXPRESSIONLIST = 14;
+const size_t CALL = 15;
+const size_t UNINITIALIZED = 16;
+const size_t LET = 17;
+const size_t FNREF = 18;

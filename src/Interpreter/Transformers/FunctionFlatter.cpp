@@ -10,7 +10,7 @@
 //Main is going to be the last function in the vector
 //The ast will only be a block with an reference to the main
 void flattenFunctions(ASTNode& root, std::vector<ASTNode>& fns){
-    for(int i = 0; i < root.getChildCount(); i++){
+    for(size_t i = 0; i < root.getChildCount(); i++){
         flattenFunctions(root.getChildMutable(i), fns);
 
         if(root.getChild(i).getTokenType() == FUNDEF){

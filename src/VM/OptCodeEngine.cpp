@@ -205,7 +205,7 @@ class OptCodeEngine{
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             memory.setRegister(
                 statementPtr[0], 
-                memory.getRegister(statementPtr[0]) > 0 ^ memory.getRegister(statementPtr[1]) > 0 ? 1 : 0
+                (memory.getRegister(statementPtr[0]) > 0) ^ (memory.getRegister(statementPtr[1]) > 0) ? 1 : 0
             );
             nextStatementIndex += 4;
         });

@@ -29,17 +29,17 @@ class Parser{
     private:
     
     //[RuleId][Index] -> StopTokenIndex
-    std::map<int, std::map<int, int>> cache;
+    std::map<size_t, std::map<size_t, size_t>> cache;
 
     std::vector<Token> tokens;
-    std::vector<int> markers;
-    int index;
+    std::vector<size_t> markers;
+    size_t index;
 
     inline const Token& getToken() const{
         return LA(0);
     }
 
-    inline const Token& LA(int offset) const{
+    inline const Token& LA(size_t offset) const{
         #if defined(VERBOSE)
         if(index + offset >= tokens.size())
             std::cout << "Index out of bounds: " << BT;
@@ -48,28 +48,28 @@ class Parser{
         return tokens[index + offset];
     }
 
-    inline const int& LAType(int offset) const{
+    inline const size_t LAType(size_t offset) const{
         return LA(offset).getType();
     }
 
-    inline const bool LATypeIs(int offset, int type) const{
+    inline const bool LATypeIs(size_t offset, size_t type) const{
         if(index + offset >= tokens.size())
             return false;
 
         return LAType(offset) == type;
     }
 
-    inline void skipTo(int index){
+    inline void skipTo(size_t index){
         this->index = index;
     }
     
     const int CACHE_MISS = -2;
     const int FAILED_TO_PARSE = -1;
-    inline void memorize(int ruleId, int stopIndex){
+    inline void memorize(size_t ruleId, size_t stopIndex){
         cache[ruleId][this->index] = stopIndex;
     }
 
-    inline int checkCache(int ruleId){
+    inline int checkCache(size_t ruleId){
         if(cache.find(ruleId) == cache.end())
             return CACHE_MISS;
 
@@ -140,24 +140,25 @@ class Parser{
         markers.pop_back();
     }
 
-    ASTNode block(int level);
-    ASTNode statement(int level);
-    ASTNode expression(int level);
+    ASTNode block(size_t level);
+    ASTNode statement(size_t level);
+    ASTNode expression(size_t level);
 
-    ASTNode let(int level);
+    ASTNode let(size_t level);
 
-    ASTNode branch(int level);
-    ASTNode ret(int level);
-    ASTNode infixOperation(int level);
-    ASTNode functionDefinition(int level);
-    ASTNode call(int level);
-    ASTNode operand(int level);
+    ASTNode branch(size_t level);
+    ASTNode ret(size_t level);
+    ASTNode infixOperation(size_t level);
+    ASTNode functionDefinition(size_t level);
+    ASTNode call(size_t level);
+    ASTNode operand(size_t level);
 
-    typedef ASTNode (Parser::*ParserFn)(int);
-    bool speculate(int level, ParserFn fn);
+    typedef ASTNode (Parser::*ParserFn)(size_t);
+    bool speculate(size_t level, ParserFn fn);
 };
 
-inline bool Parser::speculate(int level, ParserFn fn){
+//TODO: Speculation could be done with templates to make it faster
+inline bool Parser::speculate(size_t level, ParserFn fn){
     long ruleId = (long)&fn;
     bool success = true;
 
@@ -192,7 +193,7 @@ inline bool Parser::speculate(int level, ParserFn fn){
     return success;
 }
 
-ASTNode Parser::statement(int level){
+ASTNode Parser::statement(size_t level){
     #if defined(VERBOSE)
     print(level, "STATEMENT");
     printStream(level, MAX_TOKEN_PRINT);
@@ -217,7 +218,6 @@ ASTNode Parser::statement(int level){
         return node;
     }
 
-    //TODO PUSH HIGHER
     else if(LAType(0) == LET && speculate(level, &Parser::let))
         return let(level);
 
@@ -225,7 +225,7 @@ ASTNode Parser::statement(int level){
         throw ParsingException("block, assignment, branch, return", typeToString(getToken().getType()), BT);
 }
 
-ASTNode Parser::block(int level){
+ASTNode Parser::block(size_t level){
     #if defined(VERBOSE)
     print(level, "BLOCK");
     printStream(level, MAX_TOKEN_PRINT);
@@ -246,7 +246,7 @@ ASTNode Parser::block(int level){
     return node;
 }
 
-ASTNode Parser::expression(int level){
+ASTNode Parser::expression(size_t level){
     #if defined(VERBOSE)
     print(level, "EXPRESSION");
     printStream(level, MAX_TOKEN_PRINT);
@@ -273,7 +273,7 @@ ASTNode Parser::expression(int level){
     throw ParsingException("assignment, infix operation, function definition, call, identifier", typeToString(getToken().getType()), BT);
 }
 
-ASTNode Parser::branch(int level){
+ASTNode Parser::branch(size_t level){
     #if defined(VERBOSE)
     print(level, "BRANCH");
     printStream(level, MAX_TOKEN_PRINT);
@@ -295,7 +295,7 @@ ASTNode Parser::branch(int level){
     return node;
 }
 
-ASTNode Parser::ret(int level){
+ASTNode Parser::ret(size_t level){
     #if defined(VERBOSE)
     print(level, "RETURN");
     printStream(level, MAX_TOKEN_PRINT);
@@ -316,7 +316,7 @@ ASTNode Parser::ret(int level){
     throw ParsingException("expression", typeToString(getToken().getType()), BT);
 }
 
-ASTNode Parser::let(int level){
+ASTNode Parser::let(size_t level){
     #if defined(VERBOSE)
     print(level, "LET");
     printStream(level, MAX_TOKEN_PRINT);
@@ -330,7 +330,7 @@ ASTNode Parser::let(int level){
 }
 
 //Uses custom algorithm for operator precedence
-ASTNode Parser::infixOperation(int level){
+ASTNode Parser::infixOperation(size_t level){
     #if defined(VERBOSE)
     print(level, "INFIXOP");
     printStream(level, MAX_TOKEN_PRINT);
@@ -379,14 +379,14 @@ ASTNode Parser::infixOperation(int level){
     //Reducing stack until only one element is left
     while(stack.size() > 1){
         //Iterating over the operators
-        for(int i = 1; i < stack.size(); i += 2){
-            if(i + 2 >= stack.size() || stack[i].getToken().getPrecedence() <= stack[i + 2].getToken().getPrecedence()){
+        for(size_t i = 1u; i < stack.size(); i += 2u){
+            if(i + 2u >= stack.size() || stack[i].getToken().getPrecedence() <= stack[i + 2].getToken().getPrecedence()){
                 ASTNode node = stack[i];
-                node.addChild(stack[i - 1]);
-                node.addChild(stack[i + 1]);
+                node.addChild(stack[i - 1u]);
+                node.addChild(stack[i + 1u]);
 
-                stack.erase(stack.begin() + i - 1, stack.begin() + i + 2);
-                stack.insert(stack.begin() + i - 1, node);
+                stack.erase(stack.begin() + i - 1u, stack.begin() + i + 2u);
+                stack.insert(stack.begin() + i - 1u, node);
             }
         }
     }
@@ -401,7 +401,7 @@ ASTNode Parser::infixOperation(int level){
     return stack[0];
 }
 
-ASTNode Parser::operand(int level){
+ASTNode Parser::operand(size_t level){
     #if defined(VERBOSE)
     print(level, "OPERAND");
     printStream(level, MAX_TOKEN_PRINT);
@@ -430,7 +430,7 @@ ASTNode Parser::operand(int level){
         throw ParsingException("NUMLITERAL, IDENTIFIER, CALL", typeToString(getToken().getType()), BT);    
 }
 
-ASTNode Parser::functionDefinition(int level){
+ASTNode Parser::functionDefinition(size_t level){
     #if defined(VERBOSE)
     print(level, "FUNCTIONDEF");
     printStream(level, MAX_TOKEN_PRINT);
@@ -460,7 +460,7 @@ ASTNode Parser::functionDefinition(int level){
     return node;
 }
 
-ASTNode Parser::call(int level){
+ASTNode Parser::call(size_t level){
     #if defined(VERBOSE)
     print(level, "CALL");
     printStream(level, MAX_TOKEN_PRINT);

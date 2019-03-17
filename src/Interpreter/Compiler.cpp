@@ -40,7 +40,7 @@ std::string Compiler::block(const ASTNode& node){
     //std::cout << "BLOCK" << std::endl;
 
     std::string code = "";
-    for(int i = 0; i < node.getChildCount(); i++){
+    for(size_t i = 0; i < node.getChildCount(); i++){
         code += emit(node.getChild(i));
     }
     return code;
@@ -122,6 +122,7 @@ std::string Compiler::funDef(const ASTNode& node, std::string varname){
     //Assign to variable (Should have a specific type?)
 
     //LOAD UniqueLabel %varname
+    throw std::runtime_error("Not implemented " + node.getToken().getText() + BT);
 }
 
 std::string Compiler::call(const ASTNode& node, std::string varname){
