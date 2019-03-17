@@ -1,22 +1,22 @@
 #include <iostream>
 #include <vector>
 
-#include "../VM/OptCodeEngine.cpp"
-#include "../VM/Memory.cpp"
-#include "../VM/ByteCode.cpp"
+#include "../Source/VM/OptCodeEngine.cpp"
+#include "../Source/VM/Memory.cpp"
+#include "../Source/VM/ByteCode.cpp"
 
-#include "../VM/Types.cpp"
-#include "../ErrorHandling.cpp"
+#include "../Source/VM/Types.cpp"
+#include "../Source/ErrorHandling.cpp"
 
-#include "../VM/Assembler.cpp"
-#include "../VM/Executer.cpp"
+#include "../Source/VM/Assembler.cpp"
+#include "../Source/VM/Executer.cpp"
 
-#include "../Interpreter/Lexer.cpp"
-#include "../Interpreter/Parser.cpp"
+#include "../Source/Interpreter/Lexer.cpp"
+#include "../Source/Interpreter/Parser.cpp"
 
-#include "../Interpreter/Compiler.cpp"
+#include "../Source/Interpreter/Compiler.cpp"
 
-#include "../Interpreter/Transformers/FunctionFlatter.cpp"
+#include "../Source/Interpreter/Transformers/FunctionFlatter.cpp"
 
 #include "gtest/gtest.h"
 
