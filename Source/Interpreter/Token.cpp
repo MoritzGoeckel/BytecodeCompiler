@@ -13,7 +13,7 @@ class Token{
     public:
     
     Token(){
-        this->type = UNINITIALIZED;
+        this->type = TokenTypes::UNINITIALIZED;
         this->text = "!!!!!!!!!!!";
     }
 
@@ -39,7 +39,7 @@ class Token{
     }
 
     const int getPrecedence() const{
-        if(getType() != INFOP)
+        if(getType() != TokenTypes::INFOP)
             throw std::runtime_error("NON OP HAS NO PRECEDENCE: " + typeToString(getType()) + BT);
 
         if(precedences.find(getText()) == precedences.end())

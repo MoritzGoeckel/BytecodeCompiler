@@ -50,6 +50,8 @@ std::string typeToString(size_t type){
     return types[type];
 }
 
+namespace TokenTypes{
+
 const size_t OCBR = 0;
 const size_t CCBR = 1;
 const size_t OBR = 2;
@@ -69,3 +71,5 @@ const size_t CALL = 15;
 const size_t UNINITIALIZED = 16;
 const size_t LET = 17;
 const size_t FNREF = 18;
+
+}

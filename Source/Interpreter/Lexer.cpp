@@ -28,39 +28,39 @@ class Lexer{
     Token getNextToken(){
         consumeWhitespace();
 
-        if(getChar() == '{') { consume(); return Token(OCBR, "{"); }
-        if(getChar() == '}') { consume(); return Token(CCBR, "}"); }
-        if(getChar() == '(') { consume(); return Token(OBR, "("); }
-        if(getChar() == ')') { consume(); return Token(CBR, ")"); }
+        if(getChar() == '{') { consume(); return Token(TokenTypes::OCBR, "{"); }
+        if(getChar() == '}') { consume(); return Token(TokenTypes::CCBR, "}"); }
+        if(getChar() == '(') { consume(); return Token(TokenTypes::OBR, "("); }
+        if(getChar() == ')') { consume(); return Token(TokenTypes::CBR, ")"); }
 
-        if(getChar() == '+') { consume(); return Token(INFOP, "+"); }
-        if(getChar() == '-') { consume(); return Token(INFOP, "-"); }
-        if(matches("&&")) { consume("&&"); return Token(INFOP, "&&"); }
-        if(matches("||")) { consume("||"); return Token(INFOP, "||"); }
-        if(getChar() == '/') { consume(); return Token(INFOP, "/"); }
-        if(getChar() == '*') { consume(); return Token(INFOP, "*"); }
+        if(getChar() == '+') { consume(); return Token(TokenTypes::INFOP, "+"); }
+        if(getChar() == '-') { consume(); return Token(TokenTypes::INFOP, "-"); }
+        if(matches("&&")) { consume("&&"); return Token(TokenTypes::INFOP, "&&"); }
+        if(matches("||")) { consume("||"); return Token(TokenTypes::INFOP, "||"); }
+        if(getChar() == '/') { consume(); return Token(TokenTypes::INFOP, "/"); }
+        if(getChar() == '*') { consume(); return Token(TokenTypes::INFOP, "*"); }
     
-        if(getChar() == '=') { consume(); return Token(INFOP, "="); }
+        if(getChar() == '=') { consume(); return Token(TokenTypes::INFOP, "="); }
 
-        if(matches("==")) { consume("=="); return Token(INFOP, "=="); }
-        if(matches("!=")) { consume("!="); return Token(INFOP, "!="); }
-        if(getChar() == '>') { consume(); return Token(INFOP, ">"); }
-        if(getChar() == '<') { consume(); return Token(INFOP, "<"); }
+        if(matches("==")) { consume("=="); return Token(TokenTypes::INFOP, "=="); }
+        if(matches("!=")) { consume("!="); return Token(TokenTypes::INFOP, "!="); }
+        if(getChar() == '>') { consume(); return Token(TokenTypes::INFOP, ">"); }
+        if(getChar() == '<') { consume(); return Token(TokenTypes::INFOP, "<"); }
 
-        if(matches("return")) { consume("return"); return Token(RETURN, "return"); }
-        if(matches("if")) { consume("if"); return Token(BRANCH, "if"); }
-        if(matches("while")) { consume("while"); return Token(BRANCH, "while"); }
+        if(matches("return")) { consume("return"); return Token(TokenTypes::RETURN, "return"); }
+        if(matches("if")) { consume("if"); return Token(TokenTypes::BRANCH, "if"); }
+        if(matches("while")) { consume("while"); return Token(TokenTypes::BRANCH, "while"); }
 
-        if(matches("let")) { consume("let"); return Token(LET, ""); }
+        if(matches("let")) { consume("let"); return Token(TokenTypes::LET, ""); }
         
-        if(getChar() == ',') { consume(); return Token(COMMA, ","); } 
-        if(getChar() == ';') { consume(); return Token(SEMICOLON, ";"); }
+        if(getChar() == ',') { consume(); return Token(TokenTypes::COMMA, ","); } 
+        if(getChar() == ';') { consume(); return Token(TokenTypes::SEMICOLON, ";"); }
               
         if(isdigit(getChar()))
-            return Token(NUMLIT, consumeAlphanumWord());
+            return Token(TokenTypes::NUMLIT, consumeAlphanumWord());
 
         if(isalpha(getChar()))
-            return Token(IDENT, consumeAlphanumWord());
+            return Token(TokenTypes::IDENT, consumeAlphanumWord());
 
         //Will never happen
         throw std::runtime_error("Token unknown: " + std::string(1, getChar()) + BT);

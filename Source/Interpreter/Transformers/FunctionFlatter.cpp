@@ -13,8 +13,8 @@ void flattenFunctions(ASTNode& root, std::vector<ASTNode>& fns){
     for(size_t i = 0; i < root.getChildCount(); i++){
         flattenFunctions(root.getChildMutable(i), fns);
 
-        if(root.getChild(i).getTokenType() == FUNDEF){
-            ASTNode fnRef(Token(FNREF, std::to_string(fns.size())));
+        if(root.getChild(i).getTokenType() == TokenTypes::FUNDEF){
+            ASTNode fnRef(Token(TokenTypes::FNREF, std::to_string(fns.size())));
             fns.push_back(root.getChild(i));
             root.setChild(i, fnRef);
         }
@@ -22,11 +22,11 @@ void flattenFunctions(ASTNode& root, std::vector<ASTNode>& fns){
 }
 
 void createMain(ASTNode& root){
-    ASTNode newRoot = ASTNode(Token(BLOCK, ""));
+    ASTNode newRoot = ASTNode(Token(TokenTypes::BLOCK, ""));
     
-    newRoot.addChild(Token(FUNDEF, "main"));
+    newRoot.addChild(Token(TokenTypes::FUNDEF, "main"));
 
-    newRoot.getChildMutable(0).addChild(Token(IDENTLIST, ""));
+    newRoot.getChildMutable(0).addChild(Token(TokenTypes::IDENTLIST, ""));
     newRoot.getChildMutable(0).addChild(root);    
 
     root = newRoot;

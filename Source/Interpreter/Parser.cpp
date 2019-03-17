@@ -12,7 +12,7 @@
 #define MAX_TOKEN_PRINT 8
 #define LEVEL_CHARS "   "
 
-//#define VERBOSE
+#define VERBOSE
 
 class Parser{
     public:
@@ -28,11 +28,11 @@ class Parser{
 
     private:
 
-    //enum Rule {BLOCK, STATEMENT, EXPRESSION, LET, BRANCH, RET, INFIX_OPERATION, FUNCTION_DEFINITION, CALL, OPERAND};    
+    enum Rule {BLOCK, STATEMENT, EXPRESSION, LET, BRANCH, RET, INFIX_OPERATION, FUNCTION_DEFINITION, CALL, OPERAND};    
     enum CacheResult {SUCCESS, FAILURE, MISS};
 
     //[RuleId][Index] -> StopTokenIndex
-    std::map<size_t, std::map<std::string, CacheResult>> cache;
+    std::map<size_t, std::map<Rule, CacheResult>> cache;
 
     std::vector<Token> tokens;
     std::vector<size_t> markers;
@@ -62,11 +62,11 @@ class Parser{
         return LAType(offset) == type;
     }
     
-    inline void memorize(size_t index, std::string ruleId, CacheResult result){
+    inline void memorize(size_t index, Rule ruleId, CacheResult result){
         cache[index][ruleId] = result; //Result could be stop index
     }
 
-    inline CacheResult checkCache(size_t index, std::string ruleId){
+    inline CacheResult checkCache(size_t index, Rule ruleId){
         if(cache.find(index) == cache.end()){
             return MISS;
         }
@@ -79,28 +79,28 @@ class Parser{
     }
 
     #if defined(VERBOSE)
-    inline void printStream(int level, int max, std::string name) const{
+    inline void printStream(size_t level, size_t max, std::string name) const{
         std::cout << " >> " << name << " ";
         printStream(level, max);
     }
     #endif
 
     #if defined(VERBOSE)
-    inline void printStream(int level, int max) const{
-        for(int i = 0; i < level; i++)
+    inline void printStream(size_t level, size_t max) const{
+        for(size_t i = 0u; i < level; i++)
             std::cout << LEVEL_CHARS;
 
         std::cout << " >> ";
 
-        for(int i = index; i < index + max && i < tokens.size(); i++)
+        for(size_t i = index; i < index + max && i < tokens.size(); i++)
             tokens[i].print();
         std::cout << std::endl;
     }
     #endif
 
     #if defined(VERBOSE)
-    inline void print(int level, std::string str){
-        for(int i = 0; i < level; i++)
+    inline void print(size_t level, std::string str){
+        for(size_t i = 0u; i < level; i++)
             std::cout << LEVEL_CHARS;
 
         std::cout << str << std::endl;
@@ -153,16 +153,22 @@ class Parser{
     ASTNode operand(size_t level);
 
     typedef ASTNode (Parser::*ParserFn)(size_t);
-    bool speculate(size_t level, ParserFn fn, std::string ruleId);
+    bool speculate(size_t level, ParserFn fn, Rule ruleId);
 };
 
 //TODO: Speculation could be done with templates to make it faster
-inline bool Parser::speculate(size_t level, ParserFn fn, std::string ruleId){
+inline bool Parser::speculate(size_t level, ParserFn fn, Rule ruleId){
+    std::cout << ruleId << std::endl;
+
     bool success = true;
     size_t startIndex = this->index;
 
     const CacheResult cacheResult = checkCache(startIndex, ruleId);
     
+    if(ruleId == Rule::LET){
+        std::cout << "LET " << cacheResult  << std::endl;
+    }
+
     //Already parsed and unsuccessful
     if(cacheResult == FAILURE){
         return false;
@@ -212,25 +218,25 @@ ASTNode Parser::statement(size_t level){
     level++;
     #endif
 
-    if(LAType(0) == OCBR && speculate(level, &Parser::block, "block"))
+    if(LAType(0) == TokenTypes::OCBR && speculate(level, &Parser::block, Rule::BLOCK))
         return block(level);
 
-    else if(LAType(0) == BRANCH && speculate(level, &Parser::branch, "branch"))
+    else if(LAType(0) == TokenTypes::BRANCH && speculate(level, &Parser::branch, Rule::BRANCH))
         return branch(level);
 
-    else if(LAType(0) == RETURN && speculate(level, &Parser::ret, "ret")){
+    else if(LAType(0) == TokenTypes::RETURN && speculate(level, &Parser::ret, Rule::RET)){
         ASTNode node = ret(level);
-        consume(SEMICOLON);
+        consume(TokenTypes::SEMICOLON);
         return node;
     }
 
-    else if(speculate(level, &Parser::expression, "expression")){
+    else if(speculate(level, &Parser::expression, Rule::EXPRESSION)){
         ASTNode node = expression(level);
-        consume(SEMICOLON);
+        consume(TokenTypes::SEMICOLON);
         return node;
     }
 
-    else if(LAType(0) == LET && speculate(level, &Parser::let, "let"))
+    else if(LAType(0) == TokenTypes::LET && speculate(level, &Parser::let, Rule::LET))
         return let(level);
 
     else
@@ -244,16 +250,16 @@ ASTNode Parser::block(size_t level){
     level++;
     #endif
     
-    consume(OCBR); 
-    ASTNode node(Token(BLOCK, ""));
+    consume(TokenTypes::OCBR); 
+    ASTNode node(Token(TokenTypes::BLOCK, ""));
 
-    while(getToken().getType() != CCBR){
-        if(speculate(level, &Parser::statement, "statement"))
+    while(getToken().getType() != TokenTypes::CCBR){
+        if(speculate(level, &Parser::statement, Rule::STATEMENT))
             node.addChild(statement(level));
         else
             throw ParsingException("statement", typeToString(getToken().getType()), BT);
     }
-    consume(CCBR);
+    consume(TokenTypes::CCBR);
 
     return node;
 }
@@ -265,22 +271,22 @@ ASTNode Parser::expression(size_t level){
     level++;
     #endif
 
-    if(LAType(0) == OBR 
-    && (LATypeIs(1, IDENT) || LATypeIs(1, CBR)) 
-    && speculate(level, &Parser::functionDefinition, "functionDefinition"))
+    if(LAType(0) == TokenTypes::OBR 
+    && (LATypeIs(1, TokenTypes::IDENT) || LATypeIs(1, TokenTypes::CBR)) 
+    && speculate(level, &Parser::functionDefinition, Rule::FUNCTION_DEFINITION))
         return functionDefinition(level);
     
-    if(LAType(0) == IDENT && speculate(level, &Parser::call, "call"))
+    if(LAType(0) == TokenTypes::IDENT && speculate(level, &Parser::call, Rule::CALL))
         return call(level);
 
-    if(speculate(level, &Parser::infixOperation, "infixOperation"))
+    if(speculate(level, &Parser::infixOperation, Rule::INFIX_OPERATION))
         return infixOperation(level);
 
-    if(getToken().getType() == NUMLIT)
-        return ASTNode(consume(NUMLIT));
+    if(getToken().getType() == TokenTypes::NUMLIT)
+        return ASTNode(consume(TokenTypes::NUMLIT));
 
-    if(getToken().getType() == IDENT)
-        return ASTNode(consume(IDENT));
+    if(getToken().getType() == TokenTypes::IDENT)
+        return ASTNode(consume(TokenTypes::IDENT));
 
     throw ParsingException("assignment, infix operation, function definition, call, identifier", typeToString(getToken().getType()), BT);
 }
@@ -292,14 +298,14 @@ ASTNode Parser::branch(size_t level){
     level++;
     #endif
 
-    ASTNode node(ASTNode(consume(BRANCH)));
+    ASTNode node(ASTNode(consume(TokenTypes::BRANCH)));
 
-    if(speculate(level, &Parser::expression, "expression"))
+    if(speculate(level, &Parser::expression, Rule::EXPRESSION))
         node.addChild(expression(level));
     else
         throw ParsingException("expression", typeToString(getToken().getType()), BT);
 
-    if(speculate(level, &Parser::statement, "statement"))
+    if(speculate(level, &Parser::statement, Rule::STATEMENT))
         node.addChild(statement(level));
     else
         throw ParsingException("statement", typeToString(getToken().getType()), BT);
@@ -314,13 +320,13 @@ ASTNode Parser::ret(size_t level){
     level++;
     #endif
 
-    ASTNode node(ASTNode(consume(RETURN)));
+    ASTNode node(ASTNode(consume(TokenTypes::RETURN)));
 
-    if(getToken().getType() == SEMICOLON){
+    if(getToken().getType() == TokenTypes::SEMICOLON){
         return node;
     }
 
-    if(speculate(level, &Parser::expression, "expression")){
+    if(speculate(level, &Parser::expression, Rule::EXPRESSION)){
         node.addChild(expression(level));
         return node;
     }
@@ -335,8 +341,8 @@ ASTNode Parser::let(size_t level){
     level++;
     #endif
 
-    ASTNode node(ASTNode(consume(LET)));
-    node.addChild(consume(IDENT));
+    ASTNode node(ASTNode(consume(TokenTypes::LET)));
+    node.addChild(consume(TokenTypes::IDENT));
 
     return node;
 }
@@ -350,8 +356,8 @@ ASTNode Parser::infixOperation(size_t level){
     #endif
 
     bool withinBrackets = false;
-    if(LAType(0) == OBR){
-        consume(OBR);
+    if(LAType(0) == TokenTypes::OBR){
+        consume(TokenTypes::OBR);
         withinBrackets = true;
     }
 
@@ -359,21 +365,21 @@ ASTNode Parser::infixOperation(size_t level){
 
     std::vector<ASTNode> stack;
     while(true){
-        if(!expectingOperand && (getToken().getType() == CBR || getToken().getType() == SEMICOLON)){
+        if(!expectingOperand && (getToken().getType() == TokenTypes::CBR || getToken().getType() == TokenTypes::SEMICOLON)){
             break;
         }
         //OPERATOR
-        else if(LAType(0) == INFOP && !expectingOperand){
-            stack.push_back(ASTNode(consume(INFOP)));
+        else if(LAType(0) == TokenTypes::INFOP && !expectingOperand){
+            stack.push_back(ASTNode(consume(TokenTypes::INFOP)));
             expectingOperand = true;
         }
         //OPERAND
-        else if(speculate(level, &Parser::operand, "operand") && expectingOperand){
+        else if(speculate(level, &Parser::operand, Rule::OPERAND) && expectingOperand){
             stack.push_back(operand(level));
             expectingOperand = false;
         }
         //Open brackets
-        else if(LAType(0) == OBR){
+        else if(LAType(0) == TokenTypes::OBR){
             stack.push_back(infixOperation(level));
             expectingOperand = false;
         }
@@ -383,7 +389,7 @@ ASTNode Parser::infixOperation(size_t level){
     }
 
     if(withinBrackets)
-        consume(CBR);
+        consume(TokenTypes::CBR);
     
     if(stack.size() == 0 || stack.size() % 2 == 0)
         throw ParsingException("BAD STACK SIZE", "", BT);
@@ -420,23 +426,23 @@ ASTNode Parser::operand(size_t level){
     level++;
     #endif
 
-    if(LAType(0) == LET && speculate(level, &Parser::let, "let"))
+    if(LAType(0) == TokenTypes::LET && speculate(level, &Parser::let, Rule::LET))
         return let(level);
 
-    else if(LAType(0) == OBR 
-    && (LATypeIs(1, IDENT) || LATypeIs(1, CBR)) 
-    && speculate(level, &Parser::functionDefinition, "functionDefinition"))
+    else if(LAType(0) == TokenTypes::OBR 
+    && (LATypeIs(1, TokenTypes::IDENT) || LATypeIs(1, TokenTypes::CBR)) 
+    && speculate(level, &Parser::functionDefinition, Rule::FUNCTION_DEFINITION))
         return functionDefinition(level);
 
-    else if(LATypeIs(0, IDENT) && speculate(level, &Parser::call, "call"))
+    else if(LATypeIs(0, TokenTypes::IDENT) && speculate(level, &Parser::call, Rule::CALL))
         return call(level);
 
-    else if(LATypeIs(0, NUMLIT)){
-        return ASTNode(consume(NUMLIT));
+    else if(LATypeIs(0, TokenTypes::NUMLIT)){
+        return ASTNode(consume(TokenTypes::NUMLIT));
     }
 
-    else if(LATypeIs(0, IDENT))
-        return ASTNode(consume(IDENT));
+    else if(LATypeIs(0, TokenTypes::IDENT))
+        return ASTNode(consume(TokenTypes::IDENT));
 
     else 
         throw ParsingException("NUMLITERAL, IDENTIFIER, CALL", typeToString(getToken().getType()), BT);    
@@ -449,22 +455,22 @@ ASTNode Parser::functionDefinition(size_t level){
     level++;
     #endif
 
-    ASTNode identifierList(Token(IDENTLIST, ""));
+    ASTNode identifierList(Token(TokenTypes::IDENTLIST, ""));
 
-    consume(OBR);
-    while(getToken().getType() == IDENT){
-        identifierList.addChild(consume(IDENT));
-        if(getToken().getType() == COMMA)
-            consume(COMMA);
+    consume(TokenTypes::OBR);
+    while(getToken().getType() == TokenTypes::IDENT){
+        identifierList.addChild(consume(TokenTypes::IDENT));
+        if(getToken().getType() == TokenTypes::COMMA)
+            consume(TokenTypes::COMMA);
         else
             break;
     }
-    consume(CBR);
+    consume(TokenTypes::CBR);
 
-    ASTNode node(Token(FUNDEF, ""));
+    ASTNode node(Token(TokenTypes::FUNDEF, ""));
     node.addChild(identifierList);
 
-    if(LAType(0) == OCBR && speculate(level, &Parser::block, "block"))
+    if(LAType(0) == TokenTypes::OCBR && speculate(level, &Parser::block, Rule::BLOCK))
         node.addChild(block(level));
     else
         throw ParsingException("block", typeToString(getToken().getType()), BT);    
@@ -479,21 +485,21 @@ ASTNode Parser::call(size_t level){
     level++;
     #endif
 
-    ASTNode node(Token(CALL, ""));
-    node.addChild(consume(IDENT));
+    ASTNode node(Token(TokenTypes::CALL, ""));
+    node.addChild(consume(TokenTypes::IDENT));
 
-    ASTNode expressionList(Token(EXPRESSIONLIST, ""));
-    consume(OBR);
+    ASTNode expressionList(Token(TokenTypes::EXPRESSIONLIST, ""));
+    consume(TokenTypes::OBR);
     
-    while(getToken().getType() != CBR){
+    while(getToken().getType() != TokenTypes::CBR){
         expressionList.addChild(expression(level));
-        if(getToken().getType() == COMMA)
-            consume(COMMA);
+        if(getToken().getType() == TokenTypes::COMMA)
+            consume(TokenTypes::COMMA);
         else
             break;
     }
 
-    consume(CBR);
+    consume(TokenTypes::CBR);
     node.addChild(expressionList);
 
     return node;
