@@ -27,9 +27,12 @@ class Parser{
     }
 
     private:
-    
+
+    //enum Rule {BLOCK, STATEMENT, EXPRESSION, LET, BRANCH, RET, INFIX_OPERATION, FUNCTION_DEFINITION, CALL, OPERAND};    
+    enum CacheResult {SUCCESS, FAILURE, MISS};
+
     //[RuleId][Index] -> StopTokenIndex
-    std::map<size_t, std::map<std::string, int>> cache;
+    std::map<size_t, std::map<std::string, CacheResult>> cache;
 
     std::vector<Token> tokens;
     std::vector<size_t> markers;
@@ -59,20 +62,17 @@ class Parser{
         return LAType(offset) == type;
     }
     
-    const int PARSE_SUCCESS = -3;
-    const int CACHE_MISS = -2;
-    const int FAILED_TO_PARSE = -1;
-    inline void memorize(size_t index, std::string ruleId, int result){
+    inline void memorize(size_t index, std::string ruleId, CacheResult result){
         cache[index][ruleId] = result; //Result could be stop index
     }
 
-    inline int checkCache(size_t index, std::string ruleId){
+    inline CacheResult checkCache(size_t index, std::string ruleId){
         if(cache.find(index) == cache.end()){
-            return CACHE_MISS;
+            return MISS;
         }
 
         if(cache[index].find(ruleId) == cache[index].end()){
-            return CACHE_MISS;
+            return MISS;
         }
         
         return cache[index][ruleId];
@@ -161,15 +161,15 @@ inline bool Parser::speculate(size_t level, ParserFn fn, std::string ruleId){
     bool success = true;
     size_t startIndex = this->index;
 
-    const int cacheResult = checkCache(startIndex, ruleId);
+    const CacheResult cacheResult = checkCache(startIndex, ruleId);
     
     //Already parsed and unsuccessful
-    if(cacheResult == FAILED_TO_PARSE){
+    if(cacheResult == FAILURE){
         return false;
     }
 
     //Success
-    if(cacheResult == PARSE_SUCCESS){
+    if(cacheResult == SUCCESS){
     //if(cacheResult != CACHE_MISS && cacheResult != FAILED_TO_PARSE){
         //skipTo(cacheResult); //This should be like this ... thats a problem.
         //Would like to skip non speculates too
@@ -178,7 +178,7 @@ inline bool Parser::speculate(size_t level, ParserFn fn, std::string ruleId){
     }
     
     //Cache miss
-    if(cacheResult == CACHE_MISS){
+    if(cacheResult == MISS){
         mark();
         try{
             //Call the function on this object without parameters
@@ -198,7 +198,7 @@ inline bool Parser::speculate(size_t level, ParserFn fn, std::string ruleId){
         memorize(
             startIndex, 
             ruleId, 
-            success ? PARSE_SUCCESS : FAILED_TO_PARSE
+            success ? SUCCESS : FAILURE
         );
     }
 
