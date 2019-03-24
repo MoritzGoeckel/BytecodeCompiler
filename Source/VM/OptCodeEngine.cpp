@@ -21,7 +21,7 @@ class OptCodeEngine{
     public:
 
     OptCodeEngine(){
-        int optCode = 0;
+        int8 optCode = 0;
 
         //LOAD    L   REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
@@ -254,8 +254,10 @@ class OptCodeEngine{
 
         //CALLV REG //Thats pushing frame with parameters, setting return address
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.pushFrame(nextStatementIndex + 2);
+            //std::cout << "CALLV i=" << nextStatementIndex << " ret=" << nextStatementIndex + 2 << " nex=" << memory.getRegister(statementPtr[0]) << std::endl;
+            int retIndex = nextStatementIndex + 2;
             nextStatementIndex = memory.getRegister(statementPtr[0]);
+            memory.pushFrame(retIndex);
         });
         humanReadableCodes["CALLV"] = optCode++;
 
@@ -264,16 +266,6 @@ class OptCodeEngine{
             nextStatementIndex = memory.popFrame();
         });
         humanReadableCodes["RETURN"] = optCode++;
-
-        //COPY     REG REG
-        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.setRegister(
-                statementPtr[1], 
-                memory.getRegister(statementPtr[0])
-            );
-            nextStatementIndex += 3;
-        });
-        humanReadableCodes["COPY"] = optCode++;
 
         //Theses do not have commands:
         //LABEL   L

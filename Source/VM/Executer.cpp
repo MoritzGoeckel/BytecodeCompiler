@@ -9,6 +9,10 @@
 #include "Memory.cpp"
 #include "OptCodeEngine.cpp"
 
+#include <iostream>
+
+//#define EXEC_INTERACTIVE
+
 void execute(ByteCode code){
     OptCodeEngine e;
     Memory m;
@@ -18,11 +22,21 @@ void execute(ByteCode code){
     int nextStatementIndex = 0;
 
     while(!end){
-        int8 opt = byteArray[nextStatementIndex];
-        //std::cout << "Before " << std::to_string(opt) << " " << e.disassambleOptCode(opt) << " " << std::to_string(nextStatementIndex) << " " << std::to_string(end) << std::endl;
-        e.getOperation(opt)(byteArray + nextStatementIndex + 1, m, nextStatementIndex, end);
-        //std::cout << "-> " << std::to_string(opt) << " " << e.disassambleOptCode(opt) << " " << std::to_string(nextStatementIndex) << " " << std::to_string(end) << std::endl;
-    }
 
-    //std::cout << "Used " << std::to_string(m.getSize()) << " registers" << std::endl;
+        #ifdef EXEC_INTERACTIVE
+        int8 opt = byteArray[nextStatementIndex];
+        std::cout << "Executing: " 
+            << " In: " << std::to_string(nextStatementIndex)
+            << " Op: " << std::to_string(opt) << "(" << e.disassambleOptCode(opt) << ")"
+            << " P1: " << std::to_string(*(byteArray + nextStatementIndex + 1)) 
+            << " P2: " << std::to_string(*(byteArray + nextStatementIndex + 2))
+            << " P3: " << std::to_string(*(byteArray + nextStatementIndex + 3)) 
+            << std::endl;
+
+        e.getOperation(opt)(byteArray + nextStatementIndex + 1, m, nextStatementIndex, end);
+        std::cin.get();
+        #else
+        e.getOperation(byteArray[nextStatementIndex])(byteArray + nextStatementIndex + 1, m, nextStatementIndex, end);
+        #endif
+    }
 }

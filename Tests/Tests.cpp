@@ -167,25 +167,26 @@ TEST(Transformer, FlattenFunctionsTest) {
   addVoidReturn(fns);
   std::cout << ">> Done adding void return" << std::endl;
 
-  std::cout << ">> Main" << std::endl;
-  main.print();
+  //std::cout << ">> Main" << std::endl;
+  //main.print();
 
-  std::cout << ">> Functions" << std::endl;
-  for(auto f : fns){
-    f.print();
-  }
+  //std::cout << ">> Functions" << std::endl;
+  //for(auto f : fns){
+  //  f.print();
+  //}
 
   Compiler c;
   std::string compiled = c.compile(fns, main);
 
-  std::cout << compiled << std::endl;
+  //std::cout << compiled << std::endl;
   std::cout << ">> Done compiling" << std::endl;
   
-  //ByteCode code = assembleString(compiled);
-  //std::cout << ">> Done assembling" << std::endl;
+  ByteCode code = assembleString(compiled);
+  code.write("MAFiles/samplecode.bc");
+  std::cout << ">> Done assembling" << std::endl;
 
-  //execute(code);
-  //std::cout << ">> Done executing" << std::endl;
+  execute(code);
+  std::cout << ">> Done executing" << std::endl;
 }
 
 int main(int argc, char **argv) {

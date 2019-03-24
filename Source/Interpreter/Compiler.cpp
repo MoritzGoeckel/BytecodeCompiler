@@ -36,13 +36,17 @@ std::string Compiler::compile(const std::vector<ASTNode> functions, const ASTNod
     std::string output("");
 
     output += emit(main, "main");
+    output += "END" + endl;
     output += "##############" + endl;
 
     for(size_t i = 0; i < functions.size(); i++){
         output += emit(functions[i], "fn" + std::to_string(i));
         output += "##############" + endl;
     }
-    return output + "END";
+
+    // Removing the first &main:
+    output.erase(0, 6);
+    return output;
 }
 
 std::string Compiler::block(const ASTNode& node){
@@ -63,6 +67,8 @@ std::string Compiler::ret(const ASTNode& node){
     }
     code += "PUSH %" + tmpVar + endl;
     rs.giveBack(tmpVar);
+    code += "RETURN" + endl;
+
     return code;
 }
 
@@ -176,7 +182,7 @@ std::string Compiler::call(const ASTNode& node, std::string varname){
 
         // Thats returning 0 (void) for print
         code += "LOAD 0 %" + tmpVar + endl;
-        code += "COPY %" + tmpVar + " %" + varname + endl;
+        code += "MOVE %" + tmpVar + " %" + varname + endl;
         return code;
     }
     else 
@@ -185,13 +191,13 @@ std::string Compiler::call(const ASTNode& node, std::string varname){
         //CALLV WEN????
 
         //Call
-        code += "CALL %" + ident + endl;
+        code += "CALLV %" + ident + endl;
 
         //Get return
         //Only if returns something
         const std::string tmpVar2 = rs.borrow();
         code += "POP %" + tmpVar2 + endl;
-        code += "COPY %" + tmpVar2 + " %" + varname + endl;
+        code += "MOVE %" + tmpVar2 + " %" + varname + endl;
         rs.giveBack(tmpVar2);
     }
 
@@ -217,12 +223,12 @@ std::string Compiler::expression(const ASTNode& node, std::string varname){
 
     if(node.getTokenType() == TokenType::IDENT){
         //Todo: This is not the most efficient way
-        return "COPY %" + node.getToken().getText() + " %" + varname + endl;
+        return "MOVE %" + node.getToken().getText() + " %" + varname + endl;
     }
 
     if(node.getTokenType() == TokenType::FNREF){
         //Todo: This is not the most efficient way
-        return "COPY &fn" + node.getText() + " %" + varname + endl;
+        return "LOAD &fn" + node.getText() + " %" + varname + endl;
     }
 
     throw std::runtime_error("Unexpected node: " + node.getToken().getPrintString() + BT);
