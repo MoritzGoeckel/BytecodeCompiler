@@ -73,8 +73,6 @@ std::string Compiler::ret(const ASTNode& node){
 }
 
 std::string Compiler::numlit(const ASTNode& node, std::string varname){
-    //std::cout << "NUMLIT" << std::endl;
-
     if(varname == "NONE")
         return "";
 
@@ -115,19 +113,12 @@ std::string Compiler::infop(const ASTNode& node, std::string varname){
             throw std::runtime_error("Unknown operator text " + nodeText + BT);
 
         std::string x = rs.borrow();
-        //std::string y = rs.borrow();
 
         std::string code = emit(node.getChild(0), x);
         code += emit(node.getChild(1), varname);
         code += optcode + " %" + x + " %" +  varname + " %" + varname + endl;
 
-        //code += compile(node.getChild(1), y);
-        //code += optcode + " " + x + " " + y + " " + varname + endl;
-
-        //Todo: Remove commented code if Im sure it works
-
         rs.giveBack(x);
-        //rs.giveBack(y);
 
         return code;
     }
@@ -141,12 +132,6 @@ std::string Compiler::funDef(const ASTNode& node, std::string varname){
     if(identlist.getTokenType() != TokenType::IDENTLIST){
         throw std::runtime_error("Expected token type IDENTLIST but got " + node.getToken().getText() + BT);
     }
-
-    //std::string pops("");
-    //for(const auto& ident : identlist.getChildren()){
-    //    pops = "POP %" + ident.getText() + endl + pops;
-    //}
-    //output += pops;
 
     for(const auto& ident : identlist.getChildren()){
         output += "POP %" + ident.getText() + endl;
@@ -165,6 +150,7 @@ std::string Compiler::call(const ASTNode& node, std::string varname){
     const std::string tmpVar = rs.borrow();
     int parameterCount = exprlist.getChildCount();
     std::string code = "";
+
     //Evaluating the last parameter first to maintain order
     //  while using the stack
     for(int i = parameterCount - 1; i >= 0; i--){
@@ -174,7 +160,6 @@ std::string Compiler::call(const ASTNode& node, std::string varname){
     rs.giveBack(tmpVar);
 
     //Actual function call
-
     if(ident == "print")
     {
         const std::string tmpVar = rs.borrow();
@@ -191,14 +176,10 @@ std::string Compiler::call(const ASTNode& node, std::string varname){
     }
     else 
     {
-        //Todo: Call to content of ident
-        //CALLV WEN????
-
         //Call
         code += "CALLV %" + ident + endl;
 
         //Get return
-        //Only if returns something
         const std::string tmpVar2 = rs.borrow();
         code += "POP %" + tmpVar2 + endl;
         code += "MOVE %" + tmpVar2 + " %" + varname + endl;
@@ -226,12 +207,10 @@ std::string Compiler::expression(const ASTNode& node, std::string varname){
     }
 
     if(node.getTokenType() == TokenType::IDENT){
-        //Todo: This is not the most efficient way
         return "MOVE %" + node.getToken().getText() + " %" + varname + endl;
     }
 
     if(node.getTokenType() == TokenType::FNREF){
-        //Todo: This is not the most efficient way
         return "LOAD &fn" + node.getText() + " %" + varname + endl;
     }
 

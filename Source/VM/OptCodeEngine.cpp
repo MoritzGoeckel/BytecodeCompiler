@@ -8,6 +8,8 @@
 #include "Types.cpp"
 #include "../ErrorHandling.cpp"
 
+#define OPTIMIZED
+
 class OptCodeEngine{
 
     private:
@@ -24,11 +26,7 @@ class OptCodeEngine{
         int8 optCode = 0;
 
         //LOAD    L   REG
-        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            /*std::cout << "Loading " << std::to_string(statementPtr[0]) 
-                    << " to " << std::to_string(statementPtr[1])
-                    << std::endl;*/
-            
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){            
             memory.setRegister(statementPtr[1], statementPtr[0]);
             nextStatementIndex += 3;
         });
@@ -50,12 +48,6 @@ class OptCodeEngine{
 
         //ADD     REG REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            /*std::cout << "Adding " << std::to_string(memory.getRegister(statementPtr[0])) 
-                      << "( " << std::to_string(statementPtr[0]) << " )"
-                      << " to " << std::to_string(memory.getRegister(statementPtr[1])) 
-                      << "( " << std::to_string(statementPtr[1]) << " )"
-                      << std::endl;*/
-
             memory.setRegister(
                 statementPtr[2], 
                 memory.getRegister(statementPtr[0]) + memory.getRegister(statementPtr[1])
@@ -254,7 +246,6 @@ class OptCodeEngine{
 
         //CALLV REG //Thats pushing frame with parameters, setting return address
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            //std::cout << "CALLV i=" << nextStatementIndex << " ret=" << nextStatementIndex + 2 << " nex=" << memory.getRegister(statementPtr[0]) << std::endl;
             int retIndex = nextStatementIndex + 2;
             nextStatementIndex = memory.getRegister(statementPtr[0]);
             memory.pushFrame(retIndex);
@@ -267,10 +258,7 @@ class OptCodeEngine{
         });
         humanReadableCodes["RETURN"] = optCode++;
 
-        //Theses do not have commands:
-        //LABEL   L
-        //; COMMENT
-
+        // Generate dict for disassembling
         for (auto& t : humanReadableCodes)
             optToReadable[t.second] = t.first;
     }
@@ -292,10 +280,11 @@ class OptCodeEngine{
         return optToReadable[code];
     }
 
-    Operation getOperation(int8 code){
-        //TODO: Remove, this is expensive
+    inline Operation getOperation(int8 code){
+        #ifndef OPTIMIZED
         if(code > operations.size() || code < 0)
             throw std::runtime_error("Code not defined for getOperation: " + std::to_string(code) + " " + BT);
+        #endif
 
         return operations[code];
     }

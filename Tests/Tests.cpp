@@ -182,7 +182,7 @@ TEST(Transformer, FlattenFunctionsTest) {
   std::cout << ">> Done compiling" << std::endl;
   
   ByteCode code = assembleString(compiled);
-  code.write("MAFiles/samplecode.bc");
+  //code.write("MAFiles/samplecode.bc");
   std::cout << ">> Done assembling" << std::endl;
 
   execute(code);
