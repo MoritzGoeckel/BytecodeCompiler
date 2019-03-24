@@ -142,11 +142,15 @@ std::string Compiler::funDef(const ASTNode& node, std::string varname){
         throw std::runtime_error("Expected token type IDENTLIST but got " + node.getToken().getText() + BT);
     }
 
-    std::string pops("");
+    //std::string pops("");
+    //for(const auto& ident : identlist.getChildren()){
+    //    pops = "POP %" + ident.getText() + endl + pops;
+    //}
+    //output += pops;
+
     for(const auto& ident : identlist.getChildren()){
-        pops = "POP %" + ident.getText() + endl + pops;
+        output += "POP %" + ident.getText() + endl;
     }
-    output += pops;
 
     output += emit(node.getChild(1));
 
