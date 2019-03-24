@@ -345,8 +345,9 @@ ASTNode Parser::infixOperation(size_t level){
     while(true){
         if(!expectingOperand 
             && (getToken().getType() == TokenType::CBR 
-                || getToken().getType() == TokenType::SEMICOLON 
-                || getToken().getType() == TokenType::OCBR)){
+                || getToken().getType() == TokenType::SEMICOLON))
+            //    || getToken().getType() == TokenType::OCBR))
+        {
             break;
         }
 

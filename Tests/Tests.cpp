@@ -134,7 +134,7 @@ TEST(Benchmarker, DeepCodeParsing) {
 }
 
 TEST(Transformer, FlattenFunctionsTest) {
-  Lexer l("MFiles/samplecode.m");
+  Lexer l("MFiles/samplecodeFib.m");
   
   std::vector<Token> tokens;
   while(!l.eof())
