@@ -1,7 +1,7 @@
 {
     let a = 3;
 
-    if (a) {
+    if (a == 1) {
         print(1);
     }
 }

@@ -12,7 +12,7 @@
 #define MAX_TOKEN_PRINT 5
 #define LEVEL_CHARS "   "
 
-#define VERBOSE
+// #define VERBOSE
 
 class Parser{
     public:
@@ -343,19 +343,25 @@ ASTNode Parser::infixOperation(size_t level){
 
     std::vector<ASTNode> stack;
     while(true){
-        if(!expectingOperand && (getToken().getType() == TokenType::CBR || getToken().getType() == TokenType::SEMICOLON)){
+        if(!expectingOperand 
+            && (getToken().getType() == TokenType::CBR 
+                || getToken().getType() == TokenType::SEMICOLON 
+                || getToken().getType() == TokenType::OCBR)){
             break;
         }
+
         //OPERATOR
         else if(LAType(0) == TokenType::INFOP && !expectingOperand){
             stack.push_back(ASTNode(consume(TokenType::INFOP)));
             expectingOperand = true;
         }
+
         //OPERAND
         else if(speculate(level, &Parser::operand, Rule::OPERAND) && expectingOperand){
             stack.push_back(operand(level));
             expectingOperand = false;
         }
+
         //Open brackets
         else if(LAType(0) == TokenType::OBR){
             stack.push_back(infixOperation(level));
