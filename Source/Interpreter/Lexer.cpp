@@ -48,6 +48,7 @@ class Lexer{
         if(matches("return")) { consume("return"); return Token(TokenType::RETURN, "return"); }
         if(matches("if")) { consume("if"); return Token(TokenType::BRANCH, "if"); }
         if(matches("while")) { consume("while"); return Token(TokenType::BRANCH, "while"); }
+        if(matches("else")) { consume("else"); return Token(TokenType::BRANCH, "else"); }
 
         if(matches("let")) { consume("let"); return Token(TokenType::LET, ""); }
 
