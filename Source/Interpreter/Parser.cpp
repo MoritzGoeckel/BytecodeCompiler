@@ -280,7 +280,7 @@ ASTNode Parser::branch(size_t level){
     node.addChild(expression(level));
     consume(TokenType::CBR);
 
-    node.addChild(block(level)); // Maybe expression?
+    node.addChild(statement(level));
 
     return node;
 }
