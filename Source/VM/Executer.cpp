@@ -21,8 +21,8 @@ void execute(ByteCode code){
     bool end = false;
     int nextStatementIndex = 0;
 
-    while(!end){
-
+    while(!end)
+    {
         #ifdef EXEC_INTERACTIVE
         int8 opt = byteArray[nextStatementIndex];
         std::cout << "Executing: " 

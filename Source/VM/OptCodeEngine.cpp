@@ -280,7 +280,7 @@ class OptCodeEngine{
         return optToReadable[code];
     }
 
-    inline Operation getOperation(int8 code){
+    inline Operation getOperation(const int8& code){
         #ifndef OPTIMIZED
         if(code > operations.size() || code < 0)
             throw std::runtime_error("Code not defined for getOperation: " + std::to_string(code) + " " + BT);

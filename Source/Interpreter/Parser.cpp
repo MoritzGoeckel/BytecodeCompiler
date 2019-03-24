@@ -198,13 +198,13 @@ ASTNode Parser::statement(size_t level){
     level++;
     #endif
 
-    if(LAType(0) == TokenType::OCBR && speculate(level, &Parser::block, Rule::BLOCK))
+    if(speculate(level, &Parser::block, Rule::BLOCK))
         return block(level);
 
-    else if(LAType(0) == TokenType::BRANCH && speculate(level, &Parser::branch, Rule::BRANCH))
+    else if(speculate(level, &Parser::branch, Rule::BRANCH))
         return branch(level);
 
-    else if(LAType(0) == TokenType::RETURN && speculate(level, &Parser::ret, Rule::RET)){
+    else if(speculate(level, &Parser::ret, Rule::RET)){
         ASTNode node = ret(level);
         consume(TokenType::SEMICOLON);
         return node;
@@ -251,12 +251,10 @@ ASTNode Parser::expression(size_t level){
     level++;
     #endif
 
-    if(LAType(0) == TokenType::OBR 
-    && (LATypeIs(1, TokenType::IDENT) || LATypeIs(1, TokenType::CBR)) 
-    && speculate(level, &Parser::functionDefinition, Rule::FUNCTION_DEFINITION))
+    if(speculate(level, &Parser::functionDefinition, Rule::FUNCTION_DEFINITION))
         return functionDefinition(level);
     
-    if(LAType(0) == TokenType::IDENT && speculate(level, &Parser::call, Rule::CALL))
+    if(speculate(level, &Parser::call, Rule::CALL))
         return call(level);
 
     if(speculate(level, &Parser::infixOperation, Rule::INFIX_OPERATION))
@@ -406,15 +404,13 @@ ASTNode Parser::operand(size_t level){
     level++;
     #endif
 
-    if(LAType(0) == TokenType::LET && speculate(level, &Parser::let, Rule::LET))
+    if(speculate(level, &Parser::let, Rule::LET))
         return let(level);
 
-    else if(LAType(0) == TokenType::OBR 
-    && (LATypeIs(1, TokenType::IDENT) || LATypeIs(1, TokenType::CBR)) 
-    && speculate(level, &Parser::functionDefinition, Rule::FUNCTION_DEFINITION))
+    else if(speculate(level, &Parser::functionDefinition, Rule::FUNCTION_DEFINITION))
         return functionDefinition(level);
 
-    else if(LATypeIs(0, TokenType::IDENT) && speculate(level, &Parser::call, Rule::CALL))
+    else if(speculate(level, &Parser::call, Rule::CALL))
         return call(level);
 
     else if(LATypeIs(0, TokenType::NUMLIT)){
@@ -450,7 +446,7 @@ ASTNode Parser::functionDefinition(size_t level){
     ASTNode node(Token(TokenType::FUNDEF, ""));
     node.addChild(identifierList);
 
-    if(LAType(0) == TokenType::OCBR && speculate(level, &Parser::block, Rule::BLOCK))
+    if(speculate(level, &Parser::block, Rule::BLOCK))
         node.addChild(block(level));
     else
         throw ParsingException("block", typeToString(getToken().getType()), BT);    
