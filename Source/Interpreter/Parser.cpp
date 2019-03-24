@@ -78,14 +78,11 @@ class Parser{
         return cache[index][ruleId];
     }
 
-    #if defined(VERBOSE)
     inline void printStream(size_t level, size_t max, std::string name) const{
         std::cout << " >> " << name << " ";
         printStream(level, max);
     }
-    #endif
 
-    #if defined(VERBOSE)
     inline void printStream(size_t level, size_t max) const{
         for(size_t i = 0u; i < level; i++)
             std::cout << LEVEL_CHARS;
@@ -96,16 +93,13 @@ class Parser{
             tokens[i].print();
         std::cout << std::endl;
     }
-    #endif
 
-    #if defined(VERBOSE)
     inline void print(size_t level, std::string str){
         for(size_t i = 0u; i < level; i++)
             std::cout << LEVEL_CHARS;
 
         std::cout << str << std::endl;
     }
-    #endif
 
     inline const Token& consume(){
         const Token& token = getToken();
@@ -276,17 +270,17 @@ ASTNode Parser::branch(size_t level){
     level++;
     #endif
 
+    print(level, "BRANCH");
+    printStream(level, MAX_TOKEN_PRINT);
+
+
     ASTNode node(ASTNode(consume(TokenType::BRANCH)));
 
-    if(speculate(level, &Parser::expression, Rule::EXPRESSION))
-        node.addChild(expression(level));
-    else
-        throw ParsingException("expression", typeToString(getToken().getType()), BT);
+    consume(TokenType::OBR);
+    node.addChild(expression(level));
+    consume(TokenType::CBR);
 
-    if(speculate(level, &Parser::statement, Rule::STATEMENT))
-        node.addChild(statement(level));
-    else
-        throw ParsingException("statement", typeToString(getToken().getType()), BT);
+    node.addChild(block(level)); // Maybe expression?
 
     return node;
 }
@@ -346,7 +340,6 @@ ASTNode Parser::infixOperation(size_t level){
         if(!expectingOperand 
             && (getToken().getType() == TokenType::CBR 
                 || getToken().getType() == TokenType::SEMICOLON))
-            //    || getToken().getType() == TokenType::OCBR))
         {
             break;
         }

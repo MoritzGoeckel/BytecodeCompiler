@@ -40,8 +40,6 @@ class Lexer{
         if(getChar() == '/') { consume(); return Token(TokenType::INFOP, "/"); }
         if(getChar() == '*') { consume(); return Token(TokenType::INFOP, "*"); }
     
-        if(getChar() == '=') { consume(); return Token(TokenType::INFOP, "="); }
-
         if(matches("==")) { consume("=="); return Token(TokenType::INFOP, "=="); }
         if(matches("!=")) { consume("!="); return Token(TokenType::INFOP, "!="); }
         if(getChar() == '>') { consume(); return Token(TokenType::INFOP, ">"); }
@@ -52,7 +50,9 @@ class Lexer{
         if(matches("while")) { consume("while"); return Token(TokenType::BRANCH, "while"); }
 
         if(matches("let")) { consume("let"); return Token(TokenType::LET, ""); }
-        
+
+        if(getChar() == '=') { consume(); return Token(TokenType::INFOP, "="); }
+
         if(getChar() == ',') { consume(); return Token(TokenType::COMMA, ","); } 
         if(getChar() == ';') { consume(); return Token(TokenType::SEMICOLON, ";"); }
               
