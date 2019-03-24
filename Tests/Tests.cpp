@@ -120,7 +120,7 @@ TEST(Compiler, CompilerTest) {
 }
 */
 
-TEST(Benchmarker, SampleCode2) {
+TEST(Benchmarker, DeepCodeParsing) {
   Lexer l("MFiles/deepCode.m");
   
   std::vector<Token> tokens;

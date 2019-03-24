@@ -9,10 +9,10 @@
 #include "ASTNode.cpp"
 #include "Exceptions.cpp"
 
-#define MAX_TOKEN_PRINT 8
+#define MAX_TOKEN_PRINT 5
 #define LEVEL_CHARS "   "
 
-//#define VERBOSE
+#define VERBOSE
 
 class Parser{
     public:
@@ -216,7 +216,7 @@ ASTNode Parser::statement(size_t level){
         return node;
     }
 
-    else if(LAType(0) == TokenType::LET && speculate(level, &Parser::let, Rule::LET))
+    else if(speculate(level, &Parser::let, Rule::LET))
         return let(level);
 
     else
