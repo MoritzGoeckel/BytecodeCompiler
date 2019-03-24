@@ -38,11 +38,15 @@ class ASTNode{
         this->token = token;
     }
 
+    const std::string getText() const{
+        return token.getText();
+    }
+
     const Token& getToken() const{
         return token;
     }
 
-    const int getTokenType() const{
+    const TokenType getTokenType() const{
         return token.getType();
     }
 
@@ -64,6 +68,10 @@ class ASTNode{
 
     const ASTNode& getChild(size_t index) const{
         return children[index];
+    }
+
+    const std::vector<ASTNode>& getChildren() const{
+        return children;
     }
 
     ASTNode& getChildMutable(size_t index){

@@ -17,6 +17,7 @@
 #include "../Source/Interpreter/Compiler.cpp"
 
 #include "../Source/Interpreter/Transformers/FunctionFlatter.cpp"
+#include "../Source/Interpreter/Transformers/ImplicitReturn.cpp"
 
 #include "gtest/gtest.h"
 
@@ -139,34 +140,52 @@ TEST(Benchmarker, SampleCode2) {
 */
 
 TEST(Transformer, FlattenFunctionsTest) {
-  Lexer l("MFiles/sampleCode2.m");
+  Lexer l("MFiles/samplecode.m");
   
   std::vector<Token> tokens;
   while(!l.eof())
     tokens.push_back(l.getNextToken());
 
-  for(Token& t : tokens)
-    t.print();
-  std::cout << std::endl;
+  //for(Token& t : tokens)
+  //  t.print();
+  //std::cout << std::endl;
   std::cout << ">> Done tokenizing" << std::endl;
 
   Parser p(tokens);
   ASTNode n = p.parse();
-  n.print();
+  // n.print();
   std::cout << ">> Done parsing" << std::endl;
 
   std::vector<ASTNode> fns;
   createMain(n);
   flattenFunctions(n, fns);
+
+  ASTNode main = fns.back();
+  fns.pop_back();
   std::cout << ">> Done flattening" << std::endl;
 
-  n.print();
+  addVoidReturn(fns);
+  std::cout << ">> Done adding void return" << std::endl;
+
+  std::cout << ">> Main" << std::endl;
+  main.print();
 
   std::cout << ">> Functions" << std::endl;
-
   for(auto f : fns){
     f.print();
   }
+
+  Compiler c;
+  std::string compiled = c.compile(fns, main);
+
+  std::cout << compiled << std::endl;
+  std::cout << ">> Done compiling" << std::endl;
+  
+  //ByteCode code = assembleString(compiled);
+  //std::cout << ">> Done assembling" << std::endl;
+
+  //execute(code);
+  //std::cout << ">> Done executing" << std::endl;
 }
 
 int main(int argc, char **argv) {

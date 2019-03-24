@@ -21,19 +21,28 @@ class Compiler{
     std::string call(const ASTNode& node, std::string varname);
     std::string expression(const ASTNode& node, std::string varname);
     std::string funDef(const ASTNode& node, std::string varname);
-
-
+    std::string ret(const ASTNode& node);
+    
     public:
     Compiler(){
         endl = "\n"; //TODO: Should be system unspecific
         rs = RegisterManager();
     }
 
-    std::string compile(const ASTNode& node);
+    std::string compile(const std::vector<ASTNode> functions, const ASTNode main);
 };
 
-std::string Compiler::compile(const ASTNode& node){
-    return emit(node) + "END";
+std::string Compiler::compile(const std::vector<ASTNode> functions, const ASTNode main){
+    std::string output("");
+
+    output += emit(main, "main");
+    output += "##############" + endl;
+
+    for(size_t i = 0; i < functions.size(); i++){
+        output += emit(functions[i], "fn" + std::to_string(i));
+        output += "##############" + endl;
+    }
+    return output + "END";
 }
 
 std::string Compiler::block(const ASTNode& node){
@@ -43,6 +52,17 @@ std::string Compiler::block(const ASTNode& node){
     for(size_t i = 0; i < node.getChildCount(); i++){
         code += emit(node.getChild(i));
     }
+    return code;
+}
+
+std::string Compiler::ret(const ASTNode& node){
+    std::string code("");
+    const std::string tmpVar = rs.borrow();
+    for(size_t i = 0; i < node.getChildCount(); i++){
+        code += emit(node.getChild(i), tmpVar);
+    }
+    code += "PUSH %" + tmpVar + endl;
+    rs.giveBack(tmpVar);
     return code;
 }
 
@@ -57,16 +77,16 @@ std::string Compiler::numlit(const ASTNode& node, std::string varname){
 }
 
 std::string Compiler::infop(const ASTNode& node, std::string varname){
-    std::string nodeText = node.getToken().getText();
+    std::string nodeText = node.getText();
 
     //Assignment
     if(nodeText == "="){
         std::string actualVarname = "";
         
         if(node.getChild(0).getTokenType() == TokenType::IDENT){
-            actualVarname = node.getChild(0).getToken().getText();
+            actualVarname = node.getChild(0).getText();
         }else if(node.getChild(0).getTokenType() == TokenType::LET){
-            actualVarname = node.getChild(0).getChild(0).getToken().getText();
+            actualVarname = node.getChild(0).getChild(0).getText();
         }else{
             throw std::runtime_error("Expecting IDENT or LET on the left side" + BT);
         }
@@ -110,19 +130,21 @@ std::string Compiler::infop(const ASTNode& node, std::string varname){
 }
 
 std::string Compiler::funDef(const ASTNode& node, std::string varname){
-    //Todo: Write to functionlist with unique name, put the reference into varname
-    
-    //Function:
+    std::string output("&" + varname + ":" + endl);
+    ASTNode identlist = node.getChild(0);
+    if(identlist.getTokenType() != TokenType::IDENTLIST){
+        throw std::runtime_error("Expected token type IDENTLIST but got " + node.getToken().getText() + BT);
+    }
 
-    //RETURN
-    //POP %b
-    //POP %a
-    //For all in identlist
+    std::string pops("");
+    for(const auto& ident : identlist.getChildren()){
+        pops = "POP %" + ident.getText() + endl + pops;
+    }
+    output += pops;
 
-    //Assign to variable (Should have a specific type?)
+    output += emit(node.getChild(1));
 
-    //LOAD UniqueLabel %varname
-    throw std::runtime_error("Not implemented " + node.getToken().getText() + BT);
+    return output;
 }
 
 std::string Compiler::call(const ASTNode& node, std::string varname){
@@ -143,7 +165,8 @@ std::string Compiler::call(const ASTNode& node, std::string varname){
 
     //Actual function call
 
-    if(ident == "print"){
+    if(ident == "print")
+    {
         const std::string tmpVar = rs.borrow();
         for(int i = 0; i < parameterCount; i++){
             code += "POP %" + tmpVar + endl;
@@ -151,20 +174,28 @@ std::string Compiler::call(const ASTNode& node, std::string varname){
         }
         rs.giveBack(tmpVar);
 
+        // Thats returning 0 (void) for print
+        code += "LOAD 0 %" + tmpVar + endl;
+        code += "COPY %" + tmpVar + " %" + varname + endl;
         return code;
     }
-
-    else {
+    else 
+    {
         //Todo: Call to content of ident
         //CALLV WEN????
+
+        //Call
+        code += "CALL %" + ident + endl;
+
+        //Get return
+        //Only if returns something
+        const std::string tmpVar2 = rs.borrow();
+        code += "POP %" + tmpVar2 + endl;
+        code += "COPY %" + tmpVar2 + " %" + varname + endl;
+        rs.giveBack(tmpVar2);
     }
 
-    //And here the actual functions
-
-    //POP %varname
-    //Pop after call to varname
-
-    throw std::runtime_error("Not implemented " + node.getToken().getText() + BT);
+    return code;
 }
 
 std::string Compiler::expression(const ASTNode& node, std::string varname){
@@ -189,24 +220,36 @@ std::string Compiler::expression(const ASTNode& node, std::string varname){
         return "COPY %" + node.getToken().getText() + " %" + varname + endl;
     }
 
+    if(node.getTokenType() == TokenType::FNREF){
+        //Todo: This is not the most efficient way
+        return "COPY &fn" + node.getText() + " %" + varname + endl;
+    }
+
     throw std::runtime_error("Unexpected node: " + node.getToken().getPrintString() + BT);
 }
 
 std::string Compiler::emit(const ASTNode& node){
-    //std::cout << "COMP" << std::endl;
     return emit(node, "NONE");
 }
 
 std::string Compiler::emit(const ASTNode& node, std::string varname){
-    //std::cout << "COMP varname" << std::endl;
     int type = node.getTokenType();
 
     if(type == TokenType::BLOCK){
         return block(node);
     }
 
-    if(type == TokenType::INFOP || type == TokenType::NUMLIT || type == TokenType::CALL || type == TokenType::IDENT || type == TokenType::FUNDEF){
+    if(    type == TokenType::INFOP 
+        || type == TokenType::NUMLIT 
+        || type == TokenType::CALL 
+        || type == TokenType::IDENT 
+        || type == TokenType::FUNDEF
+        || type == TokenType::FNREF){
         return expression(node, varname);
+    }
+
+    if(type == TokenType::RETURN){
+        return ret(node);
     }
 
     throw std::runtime_error("Unexpected node: " + node.getToken().getPrintString() + BT);

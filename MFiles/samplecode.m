@@ -1,11 +1,15 @@
 {
-    c = 2;
-    print(1 + 3, c);
-    c = c + 3;
+    let a = 3;
 
-    doSomething = (a, b){
-        print(99);
+    doSomething = (b){
+        print(90);
+        print(b);
     };
 
-    doSomething(3, 10);
+    retNine = (b){
+        print(90);
+        return 9 + 30;
+    };
+
+    doSomething(a);
 }
