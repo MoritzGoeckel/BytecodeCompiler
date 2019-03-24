@@ -13,13 +13,20 @@ This is a implementation of a bytecode compiler and a virtual machine for execut
 ## Example code
 ```
 {
-    {
-        let main = (){
-            return a + b * 42;
-        };
-        
-        let z = main();
-    }
+    let a = 3;
+
+    retNine = (b){
+        print(90);
+        return 9 + 30;
+    };
+
+    doSomething = (x, y){
+        print(x);
+        print(y());
+    };
+
+    doSomething(a, retNine);
+
     let c = 1 + (2 * main(3, 4)) + 1;
     let x = (1 + 2 * 4) * 5;
     let a = 1 * 2 + 3;
@@ -126,6 +133,9 @@ make
 * CMLE    REG REG REG
 * CMPG    REG REG REG
 * CMGE    REG REG REG
+
+* CALL    L
+* CALLV   REG
 
 * JMPC    REG L 
 * JMP     L
