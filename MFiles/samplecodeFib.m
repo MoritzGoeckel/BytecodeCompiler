@@ -1,16 +1,18 @@
 {
-    let a = 3;
+    let c0 = 0;
+    let c1 = 1;
 
-    if (a == 4) {
-        print(1);
-    }
+    let fib = (n){
+        if(n == 0){
+            return c0;
+        }
 
-    if (a == 3) {
-        print(2);
-    }
+        if(n == 1){
+            return c1;
+        }
 
-    while (a < 7) {
-        print(a);
-        a = a + 1;
-    }
+        return (fib(n - 1) + fib(n - 2));
+    };
+
+    print(fib(8));
 }

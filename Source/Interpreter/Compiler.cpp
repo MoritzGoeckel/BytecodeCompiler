@@ -68,11 +68,15 @@ std::string Compiler::block(const ASTNode& node){
 std::string Compiler::ret(const ASTNode& node){
     std::string code("");
     const std::string tmpVar = rs.borrow();
+    code += "CREATE %" + tmpVar + endl;
+
     for(size_t i = 0; i < node.getChildCount(); i++){
         code += emit(node.getChild(i), tmpVar);
     }
     code += "PUSH %" + tmpVar + endl;
     rs.giveBack(tmpVar);
+    code += "FREE %" + tmpVar + endl;
+
     code += "RETURN" + endl;
 
     return code;
@@ -91,17 +95,21 @@ std::string Compiler::infop(const ASTNode& node, std::string varname){
 
     //Assignment
     if(nodeText == "="){
+        std::string code;
         std::string actualVarname = "";
         
         if(node.getChild(0).getTokenType() == TokenType::IDENT){
             actualVarname = node.getChild(0).getText();
         }else if(node.getChild(0).getTokenType() == TokenType::LET){
             actualVarname = node.getChild(0).getChild(0).getText();
+            code += "CREATE %" + actualVarname + endl;
+
         }else{
             throw std::runtime_error("Expecting IDENT or LET on the left side" + BT);
         }
 
-        return emit(node.getChild(1), actualVarname);
+        code += emit(node.getChild(1), actualVarname);;
+        return code;
     }
 
     //ADD, SUB, MUL, DIV
@@ -112,7 +120,9 @@ std::string Compiler::infop(const ASTNode& node, std::string varname){
     || nodeText == "<" 
     || nodeText == ">" 
     || nodeText == "==" 
-    || nodeText == "!=")
+    || nodeText == "!="
+    || nodeText == "||"
+    || nodeText == "&&")
     {
         std::string optcode = "";
         if(nodeText == "+")
@@ -131,16 +141,24 @@ std::string Compiler::infop(const ASTNode& node, std::string varname){
             optcode = "CMPL";
         else if(nodeText == ">")
             optcode = "CMPG";
+        else if(nodeText == "||")
+            optcode = "OR";
+        else if(nodeText == "&&")
+            optcode = "AND";
         else
             throw std::runtime_error("Unknown operator text " + nodeText + BT);
 
         std::string x = rs.borrow();
+        std::string code;
 
-        std::string code = emit(node.getChild(0), x);
+        code += "CREATE %" + x + endl;
+        code += emit(node.getChild(0), x);
+        
         code += emit(node.getChild(1), varname);
         code += optcode + " %" + x + " %" +  varname + " %" + varname + endl;
 
         rs.giveBack(x);
+        code += "FREE %" + x + endl;
 
         return code;
     }
@@ -149,6 +167,9 @@ std::string Compiler::infop(const ASTNode& node, std::string varname){
 }
 
 std::string Compiler::funDef(const ASTNode& node, std::string varname){
+    if(varname == "NONE")
+        return "";
+
     std::string output("&" + varname + ":" + endl);
     ASTNode identlist = node.getChild(0);
     if(identlist.getTokenType() != TokenType::IDENTLIST){
@@ -156,6 +177,7 @@ std::string Compiler::funDef(const ASTNode& node, std::string varname){
     }
 
     for(const auto& ident : identlist.getChildren()){
+        output += "CREATE %" + ident.getText() + endl;
         output += "POP %" + ident.getText() + endl;
     }
 
@@ -166,12 +188,14 @@ std::string Compiler::funDef(const ASTNode& node, std::string varname){
 
 std::string Compiler::call(const ASTNode& node, std::string varname){
     std::string ident = node.getChild(0).getToken().getText();
+    std::string code = "";
 
     //Evaluate parameter expressions and pushing for later use
     const ASTNode& exprlist = node.getChild(1);
     const std::string tmpVar = rs.borrow();
+    code += "CREATE %" + tmpVar + endl;
+
     int parameterCount = exprlist.getChildCount();
-    std::string code = "";
 
     //Evaluating the last parameter first to maintain order
     //  while using the stack
@@ -180,20 +204,27 @@ std::string Compiler::call(const ASTNode& node, std::string varname){
         code += "PUSH %" + tmpVar + endl;
     }
     rs.giveBack(tmpVar);
+    code += "FREE %" + tmpVar + endl;
+
 
     //Actual function call
     if(ident == "print")
     {
         const std::string tmpVar = rs.borrow();
+        code += "CREATE %" + tmpVar + endl;
+
         for(int i = 0; i < parameterCount; i++){
             code += "POP %" + tmpVar + endl;
             code += "OUT %" + tmpVar + endl;
         }
         rs.giveBack(tmpVar);
+        code += "FREE %" + tmpVar + endl;
 
-        // Thats returning 0 (void) for print
-        code += "LOAD 0 %" + tmpVar + endl;
-        code += "MOVE %" + tmpVar + " %" + varname + endl;
+        if(varname != "NONE"){
+            // Thats returning 0 (void) for print
+            code += "LOAD 0 %" + tmpVar + endl;
+            code += "MOVE %" + tmpVar + " %" + varname + endl;
+        }
         return code;
     }
     else 
@@ -203,16 +234,18 @@ std::string Compiler::call(const ASTNode& node, std::string varname){
 
         //Get return
         const std::string tmpVar2 = rs.borrow();
+        code += "CREATE %" + tmpVar2 + endl;
         code += "POP %" + tmpVar2 + endl;
         code += "MOVE %" + tmpVar2 + " %" + varname + endl;
         rs.giveBack(tmpVar2);
+        code += "FREE %" + tmpVar2 + endl;
     }
 
     return code;
 }
 
 std::string Compiler::branch(const ASTNode& node){
-    std::string output;
+    std::string code;
 
     const ASTNode& expr = node.getChild(0);
     const ASTNode& block = node.getChild(1);
@@ -220,35 +253,41 @@ std::string Compiler::branch(const ASTNode& node){
     if(node.getText() == "if")
     {
         const std::string expResultVar = rs.borrow();
+        code += "CREATE %" + expResultVar + endl;
+
         const std::string label = ls.getNext();
 
-        output += expression(expr, expResultVar);
-        output += "NOT %" + expResultVar + " %" + expResultVar + endl;
-        output += "JMPC &" + label + " %" + expResultVar + endl;
-        output += emit(block, expResultVar);
-        output += "&" + label + ":" + endl;
+        code += expression(expr, expResultVar);
+        code += "NOT %" + expResultVar + " %" + expResultVar + endl;
+        code += "JMPC &" + label + " %" + expResultVar + endl;
+        code += emit(block, expResultVar);
+        code += "&" + label + ":" + endl;
 
         rs.giveBack(expResultVar);
+        code += "FREE %" + expResultVar + endl;
     } 
     else if(node.getText() == "while")
     {
         const std::string expResultVar = rs.borrow();
+        code += "CREATE %" + expResultVar + endl;
+
         const std::string labelEnd = ls.getNext();
         const std::string labelStart = ls.getNext();
 
-        output += "&" + labelStart + ":" + endl;
-        output += expression(expr, expResultVar);
-        output += "NOT %" + expResultVar + " %" + expResultVar + endl;
-        output += "JMPC &" + labelEnd + " %" + expResultVar + endl;
-        output += emit(block, expResultVar);
+        code += "&" + labelStart + ":" + endl;
+        code += expression(expr, expResultVar);
+        code += "NOT %" + expResultVar + " %" + expResultVar + endl;
+        code += "JMPC &" + labelEnd + " %" + expResultVar + endl;
+        code += emit(block, expResultVar);
 
-        output += "JMP &" + labelStart + endl;
-        output += "&" + labelEnd + ":" + endl;
+        code += "JMP &" + labelStart + endl;
+        code += "&" + labelEnd + ":" + endl;
 
         rs.giveBack(expResultVar);
+        code += "FREE %" + expResultVar + endl;
     }
 
-    return output;
+    return code;
 }
 
 std::string Compiler::expression(const ASTNode& node, std::string varname){
@@ -269,10 +308,16 @@ std::string Compiler::expression(const ASTNode& node, std::string varname){
     }
 
     if(node.getTokenType() == TokenType::IDENT){
+        if(varname == "NONE")
+            return "";
+
         return "MOVE %" + node.getToken().getText() + " %" + varname + endl;
     }
 
     if(node.getTokenType() == TokenType::FNREF){
+        if(varname == "NONE")
+            return "";
+
         return "LOAD &fn" + node.getText() + " %" + varname + endl;
     }
 
@@ -280,7 +325,9 @@ std::string Compiler::expression(const ASTNode& node, std::string varname){
 }
 
 std::string Compiler::emit(const ASTNode& node){
-    return emit(node, "NONE");
+    std::string code;
+    code += emit(node, "NONE");
+    return code;
 }
 
 std::string Compiler::emit(const ASTNode& node, std::string varname){

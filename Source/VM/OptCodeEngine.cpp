@@ -25,30 +25,44 @@ class OptCodeEngine{
     OptCodeEngine(){
         int8 optCode = 0;
 
+        //CREATE    REG
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){            
+            memory.createRegister(statementPtr[0]);
+            nextStatementIndex += 2;
+        });
+        humanReadableCodes["CREATE"] = optCode++;
+
+        //FREE    REG
+        operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){            
+            memory.freeRegister(statementPtr[0]);
+            nextStatementIndex += 2;
+        });
+        humanReadableCodes["FREE"] = optCode++;
+
         //LOAD    L   REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){            
-            memory.setRegister(statementPtr[1], statementPtr[0]);
+            memory.modifyRegister(statementPtr[1], statementPtr[0]);
             nextStatementIndex += 3;
         });
         humanReadableCodes["LOAD"] = optCode++;
 
         //MOVE    REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.setRegister(statementPtr[1], memory.getRegister(statementPtr[0]));
+            memory.modifyRegister(statementPtr[1], memory.getRegister(statementPtr[0]));
             nextStatementIndex += 3;
         });
         humanReadableCodes["MOVE"] = optCode++;
 
         //INCR    REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-                memory.setRegister(statementPtr[0], memory.getRegister(statementPtr[0]) + 1);
+                memory.modifyRegister(statementPtr[0], memory.getRegister(statementPtr[0]) + 1);
                 nextStatementIndex += 2;
         });
         humanReadableCodes["INCR"] = optCode++;
 
         //ADD     REG REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.setRegister(
+            memory.modifyRegister(
                 statementPtr[2], 
                 memory.getRegister(statementPtr[0]) + memory.getRegister(statementPtr[1])
             );
@@ -58,7 +72,7 @@ class OptCodeEngine{
 
         //SUB     REG REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.setRegister(
+            memory.modifyRegister(
                 statementPtr[2], 
                 memory.getRegister(statementPtr[0]) - memory.getRegister(statementPtr[1])
             );
@@ -68,7 +82,7 @@ class OptCodeEngine{
 
         //MUL     REG REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.setRegister(
+            memory.modifyRegister(
                 statementPtr[2], 
                 memory.getRegister(statementPtr[0]) * memory.getRegister(statementPtr[1])
             );
@@ -78,7 +92,7 @@ class OptCodeEngine{
 
         //DIV     REG REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.setRegister(
+            memory.modifyRegister(
                 statementPtr[2], 
                 memory.getRegister(statementPtr[0]) / memory.getRegister(statementPtr[1])
             );
@@ -104,7 +118,7 @@ class OptCodeEngine{
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
-            memory.setRegister(statementPtr[2], a == b ? 1 : 0);
+            memory.modifyRegister(statementPtr[2], a == b ? 1 : 0);
             nextStatementIndex += 4;          
         });
         humanReadableCodes["CMPE"] = optCode++;
@@ -113,7 +127,7 @@ class OptCodeEngine{
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
-            memory.setRegister(statementPtr[2], a != b ? 1 : 0);
+            memory.modifyRegister(statementPtr[2], a != b ? 1 : 0);
             nextStatementIndex += 4;          
         });
         humanReadableCodes["CMPNE"] = optCode++;
@@ -122,7 +136,7 @@ class OptCodeEngine{
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
-            memory.setRegister(statementPtr[2], a < b ? 1 : 0);
+            memory.modifyRegister(statementPtr[2], a < b ? 1 : 0);
             nextStatementIndex += 4;          
         });
         humanReadableCodes["CMPL"] = optCode++;
@@ -131,7 +145,7 @@ class OptCodeEngine{
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
-            memory.setRegister(statementPtr[2], a <= b ? 1 : 0);
+            memory.modifyRegister(statementPtr[2], a <= b ? 1 : 0);
             nextStatementIndex += 4;         
         });
         humanReadableCodes["CMLE"] = optCode++;
@@ -140,7 +154,7 @@ class OptCodeEngine{
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
-            memory.setRegister(statementPtr[2], a > b ? 1 : 0);
+            memory.modifyRegister(statementPtr[2], a > b ? 1 : 0);
             nextStatementIndex += 4;          
         });
         humanReadableCodes["CMPG"] = optCode++;
@@ -149,7 +163,7 @@ class OptCodeEngine{
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
             int a = memory.getRegister(statementPtr[0]);
             int b = memory.getRegister(statementPtr[1]);
-            memory.setRegister(statementPtr[2], a >= b ? 1 : 0);
+            memory.modifyRegister(statementPtr[2], a >= b ? 1 : 0);
             nextStatementIndex += 4;          
         });
         humanReadableCodes["CMGE"] = optCode++;
@@ -184,7 +198,7 @@ class OptCodeEngine{
 
         //AND     REG REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.setRegister(
+            memory.modifyRegister(
                 statementPtr[2], 
                 memory.getRegister(statementPtr[0]) > 0 && memory.getRegister(statementPtr[1]) > 0 ? 1 : 0
             );
@@ -194,7 +208,7 @@ class OptCodeEngine{
 
         //OR      REG REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.setRegister(
+            memory.modifyRegister(
                 statementPtr[2], 
                 memory.getRegister(statementPtr[0]) > 0 || memory.getRegister(statementPtr[1]) > 0 ? 1 : 0
             );
@@ -204,7 +218,7 @@ class OptCodeEngine{
 
         //XOR     REG REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.setRegister(
+            memory.modifyRegister(
                 statementPtr[2], 
                 (memory.getRegister(statementPtr[0]) > 0) ^ (memory.getRegister(statementPtr[1]) > 0) ? 1 : 0
             );
@@ -214,7 +228,7 @@ class OptCodeEngine{
 
         //NOT     REG REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.setRegister(
+            memory.modifyRegister(
                 statementPtr[1], 
                 memory.getRegister(statementPtr[0]) > 0 ? 0 : 1
             );
@@ -231,14 +245,14 @@ class OptCodeEngine{
 
         //POP     REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.setRegister(statementPtr[0], memory.popParameter());
+            memory.modifyRegister(statementPtr[0], memory.popParameter());
             nextStatementIndex += 2;
         });
         humanReadableCodes["POP"] = optCode++;
 
         //INCR     REG
         operations.push_back([](int8* statementPtr, Memory& memory, int& nextStatementIndex, bool& end){
-            memory.setRegister(
+            memory.modifyRegister(
                 statementPtr[0], 
                 memory.getRegister(statementPtr[0]) + 1
             );
