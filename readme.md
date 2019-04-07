@@ -109,6 +109,8 @@ cmake CMakeLists.txt
 Compile and run tests:
 
 ```
+sudo apt install build-essential
+cmake CMakeList.txt
 make
 ./runTests
 ```

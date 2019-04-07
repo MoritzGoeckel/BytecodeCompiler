@@ -120,7 +120,7 @@ TEST(Compiler, CompilerTest) {
 }
 */
 
-TEST(Benchmarker, DeepCodeParsing) {
+/*TEST(Benchmarker, DeepCodeParsing) {
   Lexer l("MFiles/deepCode.m");
   
   std::vector<Token> tokens;
@@ -131,7 +131,7 @@ TEST(Benchmarker, DeepCodeParsing) {
   Parser p(tokens);
   ASTNode n = p.parse();
   std::cout << ">> Done parsing" << std::endl;
-}
+}*/
 
 TEST(Transformer, FlattenFunctionsTest) {
   Lexer l("MFiles/samplecodeFib.m");
@@ -172,7 +172,7 @@ TEST(Transformer, FlattenFunctionsTest) {
   Compiler c;
   std::string compiled = c.compile(fns, main);
 
-  //std::cout << compiled << std::endl;
+  std::cout << compiled << std::endl;
   std::cout << ">> Done compiling" << std::endl;
   
   ByteCode code = assembleString(compiled);

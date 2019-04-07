@@ -3,6 +3,8 @@
 #include "ASTNode.cpp"
 #include "Token.cpp"
 #include "RegisterManager.cpp"
+#include "LabelManager.cpp"
+
 #include "../ErrorHandling.cpp"
 
 #include <string>
@@ -12,6 +14,8 @@ class Compiler{
     private:
     std::string endl;
     RegisterManager rs;
+    LabelManager ls;
+
 
     std::string emit(const ASTNode& node);
     std::string emit(const ASTNode& node, std::string varname);
@@ -22,11 +26,13 @@ class Compiler{
     std::string expression(const ASTNode& node, std::string varname);
     std::string funDef(const ASTNode& node, std::string varname);
     std::string ret(const ASTNode& node);
+    std::string branch(const ASTNode& node);
     
     public:
     Compiler(){
         endl = "\n"; //TODO: Should be system unspecific
         rs = RegisterManager();
+        ls = LabelManager();
     }
 
     std::string compile(const std::vector<ASTNode> functions, const ASTNode main);
@@ -99,7 +105,15 @@ std::string Compiler::infop(const ASTNode& node, std::string varname){
     }
 
     //ADD, SUB, MUL, DIV
-    if(nodeText == "+" || nodeText == "*" || nodeText == "/" || nodeText == "-"){
+    if(nodeText == "+" 
+    || nodeText == "*" 
+    || nodeText == "/" 
+    || nodeText == "-" 
+    || nodeText == "<" 
+    || nodeText == ">" 
+    || nodeText == "==" 
+    || nodeText == "!=")
+    {
         std::string optcode = "";
         if(nodeText == "+")
             optcode = "ADD";
@@ -109,6 +123,14 @@ std::string Compiler::infop(const ASTNode& node, std::string varname){
             optcode = "MUL";
         else if(nodeText == "/")
             optcode = "DIV";
+        else if(nodeText == "==")
+            optcode = "CMPE";
+        else if(nodeText == "!=")
+            optcode = "CMPNE";
+        else if(nodeText == "<")
+            optcode = "CMPL";
+        else if(nodeText == ">")
+            optcode = "CMPG";
         else
             throw std::runtime_error("Unknown operator text " + nodeText + BT);
 
@@ -189,6 +211,46 @@ std::string Compiler::call(const ASTNode& node, std::string varname){
     return code;
 }
 
+std::string Compiler::branch(const ASTNode& node){
+    std::string output;
+
+    const ASTNode& expr = node.getChild(0);
+    const ASTNode& block = node.getChild(1);
+
+    if(node.getText() == "if")
+    {
+        const std::string expResultVar = rs.borrow();
+        const std::string label = ls.getNext();
+
+        output += expression(expr, expResultVar);
+        output += "NOT %" + expResultVar + " %" + expResultVar + endl;
+        output += "JMPC &" + label + " %" + expResultVar + endl;
+        output += emit(block, expResultVar);
+        output += "&" + label + ":" + endl;
+
+        rs.giveBack(expResultVar);
+    } 
+    else if(node.getText() == "while")
+    {
+        const std::string expResultVar = rs.borrow();
+        const std::string labelEnd = ls.getNext();
+        const std::string labelStart = ls.getNext();
+
+        output += "&" + labelStart + ":" + endl;
+        output += expression(expr, expResultVar);
+        output += "NOT %" + expResultVar + " %" + expResultVar + endl;
+        output += "JMPC &" + labelEnd + " %" + expResultVar + endl;
+        output += emit(block, expResultVar);
+
+        output += "JMP &" + labelStart + endl;
+        output += "&" + labelEnd + ":" + endl;
+
+        rs.giveBack(expResultVar);
+    }
+
+    return output;
+}
+
 std::string Compiler::expression(const ASTNode& node, std::string varname){
     if(node.getTokenType() == TokenType::INFOP){
         return infop(node, varname);
@@ -235,6 +297,10 @@ std::string Compiler::emit(const ASTNode& node, std::string varname){
         || type == TokenType::FUNDEF
         || type == TokenType::FNREF){
         return expression(node, varname);
+    }
+
+    if(type == TokenType::BRANCH){
+        return branch(node);
     }
 
     if(type == TokenType::RETURN){
